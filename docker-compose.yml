@@ -1,0 +1,19 @@
+# Local PostgreSQL for development. Start with: docker compose up -d
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: fridgeai
+      POSTGRES_PASSWORD: fridgeai  # local dev only
+      POSTGRES_DB: fridgeai
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fridgeai"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:
