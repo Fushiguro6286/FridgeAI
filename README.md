@@ -2,6 +2,8 @@
 
 **Cook from what's already in your fridge.** Snap a photo of your fridge, let AI find the ingredients, get recipes you can cook right now, plan your week's meals, and order only what's missing from Blinkit, Zepto, Swiggy Instamart, BigBasket or JioMart.
 
+**🔗 Live demo: [fridge-ai-rho.vercel.app](https://fridge-ai-rho.vercel.app)**. The free backend sleeps when idle, so the first request can take about a minute.
+
 ![FridgeAI landing page](docs/screenshots/landing.webp)
 
 ## Features
