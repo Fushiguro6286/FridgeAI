@@ -92,9 +92,9 @@ cd frontend && npm run build        # type-check + production build
 
 ## Deploy
 
-- **Frontend:** Vercel or Netlify. Set the root to `frontend` and `VITE_API_URL=https://your-api`. Route all paths to `index.html`.
-- **Backend:** Render or Koyeb. Set the root to `backend` and the start command to `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Set `ENVIRONMENT=production`, `SECRET_KEY`, `DATABASE_URL`, the `AI_*` variables and `CORS_ORIGINS`.
-- **Database:** Neon (free PostgreSQL). Use a `postgresql+psycopg://…` URL.
+- **Database:** [Neon](https://neon.tech) (free PostgreSQL). Copy its connection string.
+- **Backend on Render:** **New → Blueprint** and pick this repo. `render.yaml` sets everything up. You enter `DATABASE_URL` (from Neon), `AI_API_KEY` and `CORS_ORIGINS` (your Vercel address). `SECRET_KEY` is generated for you.
+- **Frontend on Vercel:** import the repo with root directory `frontend` and set `VITE_API_URL` to your Render address. `frontend/vercel.json` makes page links like `/app/recipes` work.
 
 ## Security and privacy
 

@@ -192,3 +192,11 @@ def test_one_check_row_per_item_across_units():
     rows = compute_shopping(needs, [StockItem("tomato", None, None)])
     assert [(r.name, r.status) for r in rows] == [("tomato", "check")]
     assert sorted(rows[0].recipes) == ["Curry", "Rice", "Salad"]
+
+
+def test_hosted_postgres_urls_use_psycopg_driver():
+    from app.config import Settings
+
+    for url in ("postgres://u:p@host/db?sslmode=require", "postgresql://u:p@host/db?sslmode=require"):
+        assert Settings(database_url=url).database_url == "postgresql+psycopg://u:p@host/db?sslmode=require"
+    assert Settings(database_url="sqlite://").database_url == "sqlite://"

@@ -1,0 +1,35 @@
+# Render Blueprint for the FridgeAI API. In Render: New > Blueprint > pick this repo.
+# Values marked sync: false are asked for once in the dashboard and never stored in git.
+services:
+  - type: web
+    name: fridgeai-api
+    runtime: python
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    # Trust Render's proxy so rate limits see each visitor's real IP, not the proxy's.
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --forwarded-allow-ips='*'
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false # Neon connection string
+      - key: AI_API_KEY
+        sync: false # OpenRouter key
+      - key: CORS_ORIGINS
+        sync: false # your Vercel address, e.g. https://fridge-ai.vercel.app
+      - key: AI_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: AI_MODEL
+        value: nvidia/nemotron-3.5-super-vl:free
+      - key: AI_DISABLE_REASONING
+        value: "true"
+      - key: AI_TIMEOUT_SECONDS
+        value: "120"

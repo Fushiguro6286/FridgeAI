@@ -41,6 +41,9 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _check(self) -> "Settings":
+        # Hosts like Neon and Render hand out postgres:// URLs; we ship the psycopg 3 driver.
+        if self.database_url.startswith(("postgres://", "postgresql://")):
+            self.database_url = "postgresql+psycopg://" + self.database_url.split("://", 1)[1]
         if self.environment == "production":
             if len(self.secret_key) < 32:
                 raise ValueError("SECRET_KEY must be set (32+ chars) in production")
