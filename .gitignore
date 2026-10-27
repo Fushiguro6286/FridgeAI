@@ -22,3 +22,7 @@ coverage/
 .idea/
 .DS_Store
 Thumbs.db
+
+# local tool output
+graphify-out/
+.qodo/
