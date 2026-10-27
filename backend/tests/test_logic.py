@@ -185,3 +185,10 @@ def test_shopping_subtracts_stock_and_flags_unknowns():
     assert "onion" not in rows  # 3 in stock covers 2
     assert rows["paneer"].status == "check"  # in stock, quantity unknown
     assert rows["rice"].quantity == 1 and rows["rice"].unit == "kg"
+
+
+def test_one_check_row_per_item_across_units():
+    needs = [Need("tomato", 2, "pcs", "Curry"), Need("tomato", 100, "g", "Rice"), Need("tomato", None, None, "Salad")]
+    rows = compute_shopping(needs, [StockItem("tomato", None, None)])
+    assert [(r.name, r.status) for r in rows] == [("tomato", "check")]
+    assert sorted(rows[0].recipes) == ["Curry", "Rice", "Salad"]

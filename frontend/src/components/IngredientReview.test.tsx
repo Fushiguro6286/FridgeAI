@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { IngredientReview, toRows } from '@/components/IngredientReview'
+import { IngredientReview, stepQty, toRows } from '@/components/IngredientReview'
 import { checkFile } from '@/pages/Scan'
 import { renderWithProviders } from '@/test/utils'
 
@@ -71,5 +71,16 @@ describe('checkFile', () => {
     expect(checkFile(file('f.gif', 'image/gif', 10), 8)).toMatch(/JPG, PNG or WEBP/)
     expect(checkFile(file('f.png', 'image/png', 0), 8)).toMatch(/empty/)
     expect(checkFile(file('f.png', 'image/png', 2 * 1024 * 1024), 1)).toMatch(/limit is 1 MB/)
+  })
+})
+
+describe('stepQty', () => {
+  it('steps small amounts by 1 and large ones by 5 or 50, never below 0', () => {
+    expect(stepQty('4', 1)).toBe('5')
+    expect(stepQty('', 1)).toBe('1')
+    expect(stepQty('0', -1)).toBe('0')
+    expect(stepQty('20', -1)).toBe('15')
+    expect(stepQty('200', 1)).toBe('250')
+    expect(stepQty('lots', 1)).toBe('1')
   })
 })

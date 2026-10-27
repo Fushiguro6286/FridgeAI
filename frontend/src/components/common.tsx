@@ -1,4 +1,4 @@
-import { AlertTriangle, FlaskConical, RefreshCw, Refrigerator, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, FlaskConical, Leaf, RefreshCw, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -8,25 +8,26 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { errorMessage } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
-export function Logo({ className, to = '/' }: { className?: string; to?: string }) {
+export function Logo({ className, to = '/', inverted = false }: { className?: string; to?: string; inverted?: boolean }) {
   return (
-    <Link to={to} className={cn('inline-flex items-center gap-2 rounded-lg font-heading text-xl font-semibold text-foreground', className)}>
-      <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-        <Refrigerator className="size-[18px]" aria-hidden />
+    <Link
+      to={to}
+      className={cn('inline-flex items-center gap-2.5 rounded-lg font-heading text-2xl font-bold tracking-tight', inverted ? 'text-white' : 'text-heading', className)}
+    >
+      <span className={cn('grid size-10 place-items-center rounded-xl', inverted ? 'bg-white text-[#1a3c2f]' : 'bg-primary text-primary-foreground')}>
+        <Leaf className="size-5" aria-hidden />
       </span>
-      <span>
-        Fridge<span className="text-primary">AI</span>
-      </span>
+      FridgeAI
     </Link>
   )
 }
 
 export function PageHeader({ title, description, actions }: { title: string; description?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-3xl font-semibold sm:text-[2.1rem]">{title}</h1>
-        {description && <p className="mt-1.5 max-w-2xl text-muted-foreground">{description}</p>}
+        <h1 className="text-[2.1rem] font-medium leading-tight sm:text-[2.6rem]">{title}</h1>
+        {description && <p className="mt-1.5 max-w-2xl text-[1.05rem] text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>

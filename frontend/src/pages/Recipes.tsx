@@ -1,4 +1,4 @@
-import { AlertTriangle, ChefHat, Info, Loader2, Sparkles } from 'lucide-react'
+import { AlertTriangle, ChefHat, Info, Loader2, Minus, Plus, Sparkles, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
@@ -7,7 +7,6 @@ import { RecipeCard } from '@/components/RecipeCard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -21,13 +20,16 @@ import { cn } from '@/lib/utils'
 import type { Diet, Difficulty, Slot } from '@/types/api'
 
 const ANY = 'any'
+const LABEL = 'text-[0.7rem] font-bold uppercase tracking-[0.14em] text-heading'
 
 function FilterSelect({ id, label, value, onChange, options }: { id: string; label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
   return (
-    <div className="grid gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
+    <div className="grid gap-2">
+      <Label htmlFor={id} className={LABEL}>
+        {label}
+      </Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger id={id} className="w-full">
+        <SelectTrigger id={id} className="h-12! w-full rounded-xl bg-background/60">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -97,10 +99,25 @@ export function Recipes() {
 
   return (
     <div>
-      <PageHeader title="Discover Recipes" description="Recipes built from your confirmed ingredients, ranked by what you already have." />
+      <PageHeader
+        title="Discover Recipes"
+        description="Personalised matches for your current pantry, ranked by what you already have."
+        actions={
+          <Tabs value={tab} onValueChange={(v) => setParams(v === 'saved' ? { tab: 'saved' } : {}, { replace: true })}>
+            <TabsList className="h-11 rounded-xl border bg-card p-1 shadow-sm">
+              <TabsTrigger value="recent" className="rounded-lg px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Best matches
+              </TabsTrigger>
+              <TabsTrigger value="saved" className="rounded-lg px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Saved recipes
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        }
+      />
 
-      <section aria-label="Recipe filters" className="mb-8 rounded-2xl border bg-card p-5 shadow-(--shadow-card)">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <section aria-label="Recipe filters" className="mb-10 rounded-3xl border bg-card/90 p-6 shadow-(--shadow-card) sm:p-8">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
           <FilterSelect id="f-cuisine" label="Cuisine" value={cuisine} onChange={setCuisine} options={[{ value: ANY, label: 'Any / my preferences' }, ...CUISINES.map((c) => ({ value: c, label: c }))]} />
           <FilterSelect id="f-diet" label="Diet" value={diet} onChange={setDiet} options={[{ value: ANY, label: 'My settings' }, ...DIETS.map((d) => ({ value: d.value, label: d.label }))]} />
           <FilterSelect
@@ -112,16 +129,28 @@ export function Recipes() {
           />
           <FilterSelect id="f-diff" label="Difficulty" value={difficulty} onChange={setDifficulty} options={[{ value: ANY, label: 'Any' }, ...DIFFICULTIES]} />
           <FilterSelect id="f-meal" label="Meal" value={mealType} onChange={setMealType} options={[{ value: ANY, label: 'Any meal' }, ...SLOTS]} />
-          <div className="grid gap-1.5">
-            <Label htmlFor="f-servings">Servings</Label>
-            <Input id="f-servings" type="number" min={1} max={20} value={servings} onChange={(e) => setServings(Math.max(1, Math.min(20, Number(e.target.value) || 1)))} />
+          <div className="grid gap-2">
+            <span id="f-servings" className={LABEL}>
+              Servings
+            </span>
+            <div role="group" aria-labelledby="f-servings" className="flex h-12 items-center justify-between rounded-xl border bg-background/60 px-1.5">
+              <Button variant="ghost" size="icon-sm" onClick={() => setServings(Math.max(1, servings - 1))} disabled={servings <= 1} aria-label="Fewer servings">
+                <Minus />
+              </Button>
+              <span className="font-semibold text-heading" aria-live="polite">
+                {servings}
+              </span>
+              <Button variant="ghost" size="icon-sm" onClick={() => setServings(Math.min(20, servings + 1))} disabled={servings >= 20} aria-label="More servings">
+                <Plus />
+              </Button>
+            </div>
           </div>
         </div>
 
         {stock.length > 0 && (
-          <fieldset className="mt-5">
-            <legend className="mb-2 text-sm font-medium">Use these first</legend>
-            <div className="flex flex-wrap gap-1.5">
+          <fieldset className="mt-7 border-t pt-6">
+            <legend className={cn(LABEL, 'float-left mb-3 w-full')}>Prioritise ingredients</legend>
+            <div className="clear-both flex flex-wrap gap-2">
               {stock.slice(0, 30).map((i) => {
                 const on = prioritize.includes(i.name)
                 return (
@@ -131,10 +160,11 @@ export function Recipes() {
                     aria-pressed={on}
                     onClick={() => setPrioritize(on ? prioritize.filter((p) => p !== i.name) : [...prioritize, i.name])}
                     className={cn(
-                      'rounded-full border px-3 py-1 text-sm capitalize transition-colors',
-                      on ? 'border-primary bg-primary text-primary-foreground' : 'bg-background hover:border-primary/50',
+                      'flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold capitalize transition-colors',
+                      on ? 'border-terracotta bg-terracotta text-white shadow-sm' : 'border-transparent bg-sage-soft text-heading hover:border-terracotta/40',
                     )}
                   >
+                    {on ? <X className="size-3.5" aria-hidden /> : <Plus className="size-3.5" aria-hidden />}
                     {i.name}
                   </button>
                 )
@@ -151,7 +181,7 @@ export function Recipes() {
 
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <AllergyDisclaimer className="max-w-xl" />
-          <Button size="lg" onClick={run} disabled={generate.isPending || !aiReady}>
+          <Button size="lg" className="h-13 rounded-xl px-8" onClick={run} disabled={generate.isPending || !aiReady}>
             {generate.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
             {generate.isPending ? 'Cooking up ideas…' : 'Generate recipes'}
           </Button>
@@ -180,7 +210,7 @@ export function Recipes() {
       {(generate.isPending || generate.data) && (
         <section aria-label="New recipes" className="mb-10" aria-busy={generate.isPending}>
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-semibold">Fresh suggestions</h2>
+            <h2 className="text-[1.75rem] font-medium">Fresh suggestions</h2>
             {generate.data?.mock && <MockBadge />}
           </div>
           {generate.isPending ? (
@@ -205,7 +235,7 @@ export function Recipes() {
                 </Alert>
               )}
               {generate.data.recipes.length ? (
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {generate.data.recipes.map((r) => (
                     <RecipeCard key={r.id} recipe={r} />
                   ))}
@@ -219,14 +249,8 @@ export function Recipes() {
       )}
 
       <section aria-label="Your recipes">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">Your recipes</h2>
-          <Tabs value={tab} onValueChange={(v) => setParams(v === 'saved' ? { tab: 'saved' } : {}, { replace: true })}>
-            <TabsList>
-              <TabsTrigger value="recent">Best match</TabsTrigger>
-              <TabsTrigger value="saved">Saved</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        <div className="mb-4">
+          <h2 className="text-[1.75rem] font-medium">{tab === 'saved' ? 'Saved recipes' : 'Your recipes'}</h2>
         </div>
         {list.isPending ? (
           <CardGridSkeleton />
@@ -244,7 +268,7 @@ export function Recipes() {
               Availability is recalculated from your current inventory.{' '}
               <Badge variant="outline">{list.data.total} total</Badge>
             </p>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {list.data.items.map((r) => (
                 <RecipeCard key={r.id} recipe={r} />
               ))}

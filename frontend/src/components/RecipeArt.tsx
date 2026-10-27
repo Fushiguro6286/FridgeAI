@@ -1,7 +1,22 @@
 import { Cookie, CookingPot, Croissant, Egg, Fish, Salad, Sandwich, Soup, UtensilsCrossed, Wheat, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Decorative artwork instead of invented photo URLs. Picks an icon and palette from the title.
+// Bundled dish photos (public/img), used only when the title clearly names that dish. Order matters: palak paneer before paneer.
+const PHOTOS: [RegExp, string][] = [
+  [/palak|saag/i, 'palak-paneer'],
+  [/biryani|pulao|pilaf/i, 'biryani'],
+  [/\bpoha\b/i, 'poha'],
+  [/cutlet|tikki|patty|patties|kebab/i, 'cutlets'],
+  [/mushroom/i, 'mushroom-stir-fry'],
+  [/paneer.*(curry|masala|makhani|korma)|(butter|kadai|kadhai|shahi|matar|mutter|handi) paneer/i, 'paneer-curry'],
+]
+
+export function photoFor(title: string): string | null {
+  const hit = PHOTOS.find(([re]) => re.test(title))
+  return hit ? `/img/${hit[1]}.webp` : null
+}
+
+// Otherwise decorative artwork instead of invented photo URLs. Picks an icon and palette from the title.
 const RULES: [RegExp, LucideIcon][] = [
   [/omelette|egg|bhurji/i, Egg],
   [/sandwich|toast|wrap|roll/i, Sandwich],
@@ -27,7 +42,17 @@ function hash(s: string) {
   return Math.abs(h)
 }
 
+const HEIGHT = { sm: 'h-20', md: 'h-32', lg: 'h-48 sm:h-60' }
+
 export function RecipeArt({ title, className, size = 'md' }: { title: string; className?: string; size?: 'sm' | 'md' | 'lg' }) {
+  const photo = photoFor(title)
+  if (photo) {
+    return (
+      <div aria-hidden className={cn('relative overflow-hidden bg-muted', HEIGHT[size], className)}>
+        <img src={photo} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      </div>
+    )
+  }
   const Icon = RULES.find(([re]) => re.test(title))?.[1] ?? UtensilsCrossed
   const palette = PALETTES[hash(title) % PALETTES.length]
   return (
@@ -36,7 +61,7 @@ export function RecipeArt({ title, className, size = 'md' }: { title: string; cl
       className={cn(
         'relative grid place-items-center overflow-hidden bg-linear-to-br dark:opacity-85',
         palette,
-        size === 'sm' ? 'h-20' : size === 'lg' ? 'h-48 sm:h-60' : 'h-32',
+        HEIGHT[size],
         className,
       )}
     >

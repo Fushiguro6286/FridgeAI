@@ -1,8 +1,11 @@
 import {
   CalendarDays,
+  Coffee,
+  Cookie,
   Info,
   Loader2,
   Minus,
+  Moon,
   MoreVertical,
   Pencil,
   Plus,
@@ -10,8 +13,11 @@ import {
   Replace,
   ShoppingBasket,
   Sparkles,
+  Sun,
   Trash2,
+  WandSparkles,
   X,
+  type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
@@ -21,7 +27,6 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { RecipeArt } from '@/components/RecipeArt'
 import { RecipePickerDialog } from '@/components/RecipePickerDialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -188,9 +193,15 @@ function MealSlot({ plan, day, slot, entry, aiReady }: { plan: MealPlan; day: st
   }
 
   return (
-    <li className={cn('rounded-xl border bg-card shadow-(--shadow-card)', busy && 'opacity-70')} aria-busy={busy}>
-      <div className="flex items-center justify-between border-b px-4 py-2.5">
-        <h3 className="font-sans text-sm font-semibold uppercase tracking-wide text-muted-foreground">{slotLabel(slot)}</h3>
+    <li className={cn('rounded-2xl border bg-card shadow-(--shadow-card)', entry?.recipe.missing.length && 'border-l-4 border-l-warn', busy && 'opacity-70')} aria-busy={busy}>
+      <div className="flex items-center justify-between border-b px-5 py-3">
+        <h3 className="flex items-center gap-2 font-sans text-[0.72rem] font-bold uppercase tracking-[0.14em] text-terracotta">
+          {(() => {
+            const Icon = SLOT_ICON[slot]
+            return <Icon className="size-4" aria-hidden />
+          })()}
+          {slotLabel(slot)}
+        </h3>
         {entry && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -214,10 +225,10 @@ function MealSlot({ plan, day, slot, entry, aiReady }: { plan: MealPlan; day: st
         )}
       </div>
       {entry ? (
-        <div className="flex gap-4 p-4">
-          <RecipeArt title={entry.recipe.title} size="sm" className="hidden w-20 shrink-0 rounded-lg sm:grid" />
+        <div className="flex gap-4 p-5">
+          <RecipeArt title={entry.recipe.title} size="sm" className="hidden size-20 shrink-0 rounded-xl sm:grid" />
           <div className="min-w-0 flex-1 space-y-2">
-            <Link to={`/app/recipes/${entry.recipe.id}`} className="block rounded font-heading text-lg font-semibold leading-snug hover:text-primary">
+            <Link to={`/app/recipes/${entry.recipe.id}`} className="block rounded text-lg font-semibold leading-snug text-heading hover:text-terracotta">
               {entry.recipe.title}
             </Link>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
@@ -259,7 +270,7 @@ function MealSlot({ plan, day, slot, entry, aiReady }: { plan: MealPlan; day: st
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-3 p-4">
+        <div className="flex items-center justify-between gap-3 p-5">
           <span className="text-sm text-muted-foreground">Nothing planned</span>
           <Button variant="outline" size="sm" onClick={() => setPicking(true)} disabled={busy}>
             <Plus /> Add recipe
@@ -272,6 +283,77 @@ function MealSlot({ plan, day, slot, entry, aiReady }: { plan: MealPlan; day: st
     </li>
   )
 }
+
+const SLOT_ICON: Record<Slot, LucideIcon> = { breakfast: Coffee, lunch: Sun, dinner: Moon, snack: Cookie }
+
+function WeekGrid({ days, slots, byKey, selected, onSelect }: { days: string[]; slots: Slot[]; byKey: Map<string, PlanEntry>; selected: string; onSelect: (d: string) => void }) {
+  const today = isoDate()
+  return (
+    <div className="overflow-x-auto rounded-3xl border bg-card/80 shadow-(--shadow-card) backdrop-blur-sm">
+      <table className="w-full min-w-[46rem] table-fixed border-collapse">
+        <caption className="sr-only">Week at a glance</caption>
+        <thead>
+          <tr className="border-b">
+            <th scope="col" className="w-24">
+              <span className="sr-only">Meal</span>
+            </th>
+            {days.map((d) => (
+              <th key={d} scope="col" className={cn('px-2 py-4 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground', d === selected && 'bg-sage-soft/60 text-heading')}>
+                {parseDay(d)}
+                {d === today && <span className="block text-[0.6rem] text-terracotta">Today</span>}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {slots.map((s) => {
+            const Icon = SLOT_ICON[s]
+            return (
+              <tr key={s} className="border-b last:border-b-0">
+                <th scope="row" className="px-2 py-4 text-center text-[0.65rem] font-bold uppercase tracking-wider text-heading">
+                  <Icon className="mx-auto mb-1 size-5" aria-hidden />
+                  {slotLabel(s)}
+                </th>
+                {days.map((d) => {
+                  const e = byKey.get(`${d}|${s}`)
+                  const missing = e?.recipe.missing.length ?? 0
+                  return (
+                    <td key={d} className={cn('border-l p-2 align-top', d === selected && 'bg-sage-soft/40')}>
+                      <button
+                        type="button"
+                        onClick={() => onSelect(d)}
+                        aria-label={e ? `${slotLabel(s)} on ${shortDay(d)}: ${e.recipe.title}` : `Add ${slotLabel(s).toLowerCase()} on ${shortDay(d)}`}
+                        className={cn(
+                          'flex h-full min-h-32 w-full flex-col rounded-xl p-2 text-left transition-colors',
+                          e ? 'border bg-card shadow-sm hover:border-primary/30' : 'grid place-items-center border border-dashed text-muted-foreground/50 hover:border-primary/40 hover:text-primary',
+                          missing > 0 && 'border-l-4 border-l-warn',
+                        )}
+                      >
+                        {e ? (
+                          <>
+                            <span className="line-clamp-2 text-[0.65rem] font-bold uppercase leading-tight text-terracotta">{e.recipe.title}</span>
+                            <RecipeArt title={e.recipe.title} size="sm" className="my-2 h-14 rounded-lg" />
+                            <span className={cn('mt-auto text-[0.7rem] font-semibold', missing ? 'text-warn-foreground' : 'text-heading')}>
+                              {missing ? 'Missing items' : formatMinutes(e.recipe.total_minutes)}
+                            </span>
+                          </>
+                        ) : (
+                          <Plus className="size-4" aria-hidden />
+                        )}
+                      </button>
+                    </td>
+                  )
+                })}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+const parseDay = (d: string) => shortDay(d).split(' ')[0].replace(',', '')
 
 export function Planner() {
   const health = useHealth()
@@ -330,10 +412,10 @@ export function Planner() {
     <div>
       <PageHeader
         title="Meal Planner"
-        description="Plan breakfast, lunch and dinner around what you have. Change any meal without touching the rest."
+        description="Plan your week, waste less, eat better. Change any meal without touching the rest."
         actions={
-          <Button onClick={() => setGenOpen(true)} disabled={!aiReady && !items.length}>
-            <Sparkles /> New plan
+          <Button variant="outline" size="lg" className="h-12 rounded-xl bg-card shadow-sm" onClick={() => setGenOpen(true)} disabled={!aiReady && !items.length}>
+            <WandSparkles /> Generate plan with AI
           </Button>
         }
       />
@@ -356,8 +438,8 @@ export function Planner() {
       ) : (
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-2">
-            <Select value={planId ? String(planId) : undefined} onValueChange={(v) => setPlanId(Number(v))}>
-              <SelectTrigger className="w-full sm:w-72" aria-label="Choose plan">
+            <Select value={planId ? String(planId) : ''} onValueChange={(v) => setPlanId(Number(v))}>
+              <SelectTrigger className="h-11! w-full rounded-xl bg-card sm:w-80" aria-label="Choose plan">
                 <SelectValue placeholder="Choose a plan" />
               </SelectTrigger>
               <SelectContent>
@@ -412,96 +494,84 @@ export function Planner() {
                 </Alert>
               )}
 
-              <div role="tablist" aria-label="Days" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-                {days.map((d) => {
-                  const count = slots.filter((s) => byKey.has(`${d}|${s}`)).length
-                  return (
-                    <button
-                      key={d}
-                      role="tab"
-                      aria-selected={d === day}
-                      onClick={() => setDay(d)}
-                      className={cn(
-                        'min-w-24 shrink-0 rounded-xl border px-3 py-2 text-left transition-colors',
-                        d === day ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:border-primary/40',
-                      )}
-                    >
-                      <span className="block text-sm font-semibold">{shortDay(d)}</span>
-                      <span className={cn('text-xs', d === day ? 'opacity-85' : 'text-muted-foreground')}>
-                        {d === today ? 'Today · ' : ''}
-                        {count}/{slots.length} meals
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
+              <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+                <div className="min-w-0 space-y-8">
+                  <WeekGrid
+                    days={days}
+                    slots={slots}
+                    byKey={byKey}
+                    selected={day}
+                    onSelect={(d) => {
+                      setDay(d)
+                      document.getElementById('day-detail')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }}
+                  />
 
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-                <ul className="space-y-3" aria-label={`Meals for ${shortDay(day)}`}>
-                  {slots.map((s) => (
-                    <MealSlot key={`${day}-${s}`} plan={plan.data} day={day} slot={s} entry={byKey.get(`${day}|${s}`)} aiReady={aiReady} />
-                  ))}
-                </ul>
-
-                <aside className="space-y-3">
-                  <div className="rounded-xl border bg-card p-5 shadow-(--shadow-card)">
-                    <h2 className="text-lg font-semibold">Ingredients this plan needs</h2>
-                    {plan.data.missing.length === 0 ? (
-                      <p className="mt-2 text-sm text-muted-foreground">Your inventory covers every planned meal.</p>
-                    ) : (
-                      <>
-                        {(['buy', 'check'] as const).map((st) => {
-                          const rows = plan.data.missing.filter((m) => m.status === st)
-                          if (!rows.length) return null
-                          return (
-                            <div key={st} className="mt-3">
-                              <h3 className="mb-1.5 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                {st === 'buy' ? `To buy (${rows.length})` : `Check you have enough (${rows.length})`}
-                              </h3>
-                              <ul className="flex flex-wrap gap-1.5">
-                                {rows.map((m) => (
-                                  <li key={m.name + (m.unit ?? '')}>
-                                    <Badge variant={st === 'buy' ? 'warn' : 'outline'} title={`For ${m.recipes.join(', ')}`}>
-                                      {m.name}
-                                      {m.quantity != null && ` · ${formatQty(m.quantity, m.unit)}`}
-                                    </Badge>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )
-                        })}
-                      </>
-                    )}
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {linked ? (
-                        <Button asChild variant="outline" size="sm">
-                          <Link to="/app/shopping">
-                            <ShoppingBasket /> Open shopping list
-                          </Link>
-                        </Button>
-                      ) : (
-                        <Button size="sm" onClick={useForShopping} disabled={build.isPending}>
-                          <ShoppingBasket /> Use for shopping list
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="hidden rounded-xl border bg-card p-5 lg:block">
-                    <h2 className="mb-3 text-lg font-semibold">Week at a glance</h2>
-                    <ul className="space-y-2 text-sm">
-                      {days.map((d) => (
-                        <li key={d}>
-                          <button type="button" onClick={() => setDay(d)} className={cn('w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted', d === day && 'bg-muted')}>
-                            <span className="font-medium">{shortDay(d)}</span>
-                            <span className="block truncate text-muted-foreground">
-                              {slots.map((s) => byKey.get(`${d}|${s}`)?.recipe.title ?? '—').join(' · ')}
+                  <section id="day-detail" className="scroll-mt-6 space-y-4" aria-label={`Meals for ${shortDay(day)}`}>
+                    <div role="tablist" aria-label="Days" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+                      {days.map((d) => {
+                        const count = slots.filter((s) => byKey.has(`${d}|${s}`)).length
+                        return (
+                          <button
+                            key={d}
+                            role="tab"
+                            aria-selected={d === day}
+                            onClick={() => setDay(d)}
+                            className={cn(
+                              'min-w-24 shrink-0 rounded-xl border px-3 py-2 text-left transition-colors',
+                              d === day ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:border-primary/40',
+                            )}
+                          >
+                            <span className="block text-sm font-semibold">{shortDay(d)}</span>
+                            <span className={cn('text-xs', d === day ? 'opacity-85' : 'text-muted-foreground')}>
+                              {d === today ? 'Today · ' : ''}
+                              {count}/{slots.length} meals
                             </span>
                           </button>
-                        </li>
+                        )
+                      })}
+                    </div>
+                    <ul className="grid gap-4 md:grid-cols-2">
+                      {slots.map((s) => (
+                        <MealSlot key={`${day}-${s}`} plan={plan.data} day={day} slot={s} entry={byKey.get(`${day}|${s}`)} aiReady={aiReady} />
                       ))}
                     </ul>
+                  </section>
+                </div>
+
+                <aside className="xl:sticky xl:top-6 xl:self-start">
+                  <div className="rounded-3xl border bg-card/90 p-6 shadow-(--shadow-card)">
+                    <h2 className="text-2xl font-medium leading-snug">Ingredients for this plan</h2>
+                    {plan.data.missing.length === 0 ? (
+                      <p className="mt-3 text-sm text-muted-foreground">Your inventory covers every planned meal.</p>
+                    ) : (
+                      <ul className="mt-5 space-y-4">
+                        {[...plan.data.missing].sort((x, y) => (x.status === y.status ? 0 : x.status === 'buy' ? -1 : 1)).map((m, i) => (
+                          <li key={`${m.name}-${m.unit}-${m.status}-${i}`} className="flex items-center gap-3" title={`For ${m.recipes.join(', ')}`}>
+                            <span className={cn('grid size-9 shrink-0 place-items-center rounded-xl', m.status === 'buy' ? 'bg-terracotta/10 text-terracotta' : 'bg-warn-soft text-warn-foreground')}>
+                              <ShoppingBasket className="size-4" aria-hidden />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-semibold capitalize text-heading">{m.name}</span>
+                              <span className={cn('block text-[0.68rem] font-bold uppercase tracking-wide', m.status === 'buy' ? 'text-terracotta' : 'text-warn-foreground')}>
+                                {m.status === 'buy' ? `Need ${m.quantity != null ? formatQty(m.quantity, m.unit) : 'some'}` : 'Check you have enough'}
+                              </span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {linked ? (
+                      <Button asChild variant="outline" size="lg" className="mt-6 w-full rounded-xl">
+                        <Link to="/app/shopping">
+                          <ShoppingBasket /> Open shopping list
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button size="lg" className="mt-6 h-13 w-full rounded-xl" onClick={useForShopping} disabled={build.isPending}>
+                        <ShoppingBasket /> Build shopping list
+                      </Button>
+                    )}
                   </div>
                 </aside>
               </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { orderText, searchUrl, storeById, whatsappUrl } from '@/lib/order'
+import { NOTEPAD_KEY, loadNotepad, notepadFrom, orderText, saveNotepad, searchUrl, storeById, whatsappUrl } from '@/lib/order'
 
 describe('order links', () => {
   it('builds an encoded store search for the item name only', () => {
@@ -19,5 +19,19 @@ describe('order links', () => {
     ]
     expect(orderText(items)).toBe('Grocery list (from FridgeAI):\n• eggs – 2\n• milk – 0.5 l\n• salt')
     expect(whatsappUrl(items)).toMatch(/^https:\/\/wa\.me\/\?text=Grocery%20list/)
+  })
+})
+
+describe('order notepad', () => {
+  it('saves and reloads the list with quantities and notes', () => {
+    saveNotepad(notepadFrom([{ key: 1, name: 'paneer', quantity: 200, unit: 'g' }], 'zepto', 'bread'))
+    expect(loadNotepad()).toEqual({ store: 'zepto', items: [{ name: 'paneer', qty: '200 g', done: false }], notes: 'bread' })
+  })
+
+  it('returns null for missing or broken data', () => {
+    localStorage.removeItem(NOTEPAD_KEY)
+    expect(loadNotepad()).toBeNull()
+    localStorage.setItem(NOTEPAD_KEY, '{oops')
+    expect(loadNotepad()).toBeNull()
   })
 })

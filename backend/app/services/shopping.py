@@ -78,4 +78,20 @@ def compute_shopping(needs: list[Need], stock: list[StockItem]) -> list[Shopping
             if g.dimension == "count" and u == "pcs":
                 u = None
             rows.append(ShoppingRow(g.name, norm, q, u, g.recipes, "buy"))
-    return rows
+    return _one_check_per_item(rows)
+
+
+def _one_check_per_item(rows: list[ShoppingRow]) -> list[ShoppingRow]:
+    """Amounts in different units stay apart, but asking "check you have enough" twice for one item reads as a bug."""
+    out: list[ShoppingRow] = []
+    checks: dict[str, ShoppingRow] = {}
+    for r in rows:
+        prev = checks.get(r.normalized_name) if r.status == "check" else None
+        if prev is None:
+            out.append(r)
+            if r.status == "check":
+                checks[r.normalized_name] = r
+            continue
+        prev.recipes += [x for x in r.recipes if x not in prev.recipes]
+        prev.quantity = prev.unit = None  # different units can't be added up
+    return out

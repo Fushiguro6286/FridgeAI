@@ -208,7 +208,7 @@ export function Settings() {
                 control={form.control}
                 name="measurement_system"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
                     <SelectTrigger id="s-units" className="w-full">
                       <SelectValue />
                     </SelectTrigger>

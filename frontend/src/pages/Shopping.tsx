@@ -225,7 +225,7 @@ export function Shopping() {
           plans.data?.items.length ? (
             <div className="flex flex-wrap gap-2">
               {orderButton}
-              <Select value={data?.meal_plan_id ? String(data.meal_plan_id) : undefined} onValueChange={(v) => rebuild(Number(v))}>
+              <Select value={data?.meal_plan_id ? String(data.meal_plan_id) : ''} onValueChange={(v) => rebuild(Number(v))}>
                 <SelectTrigger className="w-56" aria-label="Build from meal plan">
                   <SelectValue placeholder="Build from a plan…" />
                 </SelectTrigger>

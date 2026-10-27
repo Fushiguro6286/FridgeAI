@@ -1,154 +1,123 @@
 import {
-  ArrowRight,
-  Briefcase,
+  BellRing,
+  CalendarCheck,
   CalendarDays,
   Camera,
   CheckCircle2,
-  ChefHat,
   Clock,
-  ExternalLink,
-  HeartPulse,
-  Leaf,
   ListChecks,
-  Moon,
-  PiggyBank,
-  Recycle,
+  Package,
+  Play,
+  ScanLine,
   ShieldCheck,
-  ShoppingBasket,
   ShoppingCart,
-  Sparkles,
-  Sunrise,
-  Timer,
-  Wallet,
+  Truck,
+  UtensilsCrossed,
+  WandSparkles,
+  type LucideIcon,
 } from 'lucide-react'
 import { Link } from 'react-router'
 import { Logo } from '@/components/common'
-import { RecipeArt } from '@/components/RecipeArt'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/auth'
 import { STORES } from '@/lib/order'
 import { cn } from '@/lib/utils'
 
-const DEMO_INGREDIENTS = [
-  { name: 'Tomato', conf: 'high' },
-  { name: 'Paneer', conf: 'high' },
-  { name: 'Onion', conf: 'high' },
-  { name: 'Spinach', conf: 'medium' },
-  { name: 'Eggs × 6', conf: 'high' },
-  { name: 'Curd', conf: 'medium' },
-  { name: 'Green chilli', conf: 'low' },
-]
-
-const FLOATING = [
-  { emoji: '🍅', label: 'Tomato', className: '-left-8 -top-6' },
-  { emoji: '🥚', label: 'Eggs', className: '-right-4 -top-6 sm:-right-8 [animation-delay:1.2s]' },
-  { emoji: '🥬', label: 'Spinach', className: '-bottom-6 left-8 [animation-delay:2.1s]' },
-  { emoji: '🧀', label: 'Paneer', className: '-bottom-6 -right-4 sm:-right-8 [animation-delay:0.6s]' },
-]
-
-const STEPS = [
-  { icon: Camera, title: 'Snap your fridge', text: 'Take or upload a photo. FridgeAI suggests the ingredients it can actually see.' },
-  { icon: ListChecks, title: 'Review and confirm', text: 'Fix names, add what the camera missed and remove mistakes. Nothing is saved until you confirm.' },
-  { icon: ChefHat, title: 'Cook, plan and shop', text: 'Get ranked recipes, a weekly meal plan and a shopping list for only what you are missing.' },
+const STEPS: { icon: LucideIcon; tone: string; title: string; text: string }[] = [
+  {
+    icon: Camera,
+    tone: 'bg-sage-soft text-primary',
+    title: '1. Snap a photo',
+    text: 'Open FridgeAI and take a quick picture of your fridge or pantry shelf. The AI lists the ingredients it can see, and you confirm them.',
+  },
+  {
+    icon: WandSparkles,
+    tone: 'bg-terracotta/10 text-terracotta',
+    title: '2. Get recipes',
+    text: 'See what you can cook right now, from simple dal to paneer tikka, matched to your diet, allergies and the time you have.',
+  },
+  {
+    icon: ShoppingCart,
+    tone: 'bg-muted text-heading',
+    title: '3. Fill the gaps',
+    text: 'Missing green chillies or curd? They go on your shopping list, and you can open them in your delivery app in one tap.',
+  },
 ]
 
 const DAY = [
-  {
-    icon: Sunrise,
-    time: '7:30 AM',
-    title: 'Breakfast without the guesswork',
-    text: 'Half asleep? Open FridgeAI and get a 15-minute breakfast from the eggs, bread and last tomato you already have.',
-    tone: 'from-[oklch(0.95_0.05_80)] to-[oklch(0.9_0.07_65)]',
-  },
-  {
-    icon: Briefcase,
-    time: '1:00 PM',
-    title: 'Tiffin ideas from leftovers',
-    text: "Turn last night's rice and dal into tomorrow's lunch box instead of throwing them away.",
-    tone: 'from-[oklch(0.94_0.04_145)] to-[oklch(0.88_0.06_155)]',
-  },
-  {
-    icon: Moon,
-    time: '7:00 PM',
-    title: '“What’s for dinner?” sorted',
-    text: 'Snap the fridge on the way in. Recipes come ranked by what you have. Missing coriander? Order it in a tap.',
-    tone: 'from-[oklch(0.94_0.04_40)] to-[oklch(0.88_0.06_35)]',
-  },
-  {
-    icon: CalendarDays,
-    time: 'Sunday',
-    title: 'Plan the whole week in a minute',
-    text: 'One meal plan, one combined shopping list, inside your budget. No more daily trips for one onion.',
-    tone: 'from-[oklch(0.94_0.03_250)] to-[oklch(0.89_0.05_240)]',
-  },
+  { time: '7:30 AM', icon: Clock, title: 'Breakfast from leftovers', text: 'A quick poha from last night’s chopped beans and carrots, instead of another plain toast.', img: 'poha' },
+  { time: '1:00 PM', icon: Clock, title: 'Tiffin planning', text: 'Lunch-box ideas that stay good for hours, from what is already in the fridge.', img: 'tiffin-meal' },
+  { time: '7:00 PM', icon: Clock, title: 'Use-soon dinner', text: 'Spinach expiring tomorrow? Tonight’s suggestions put it first, so it gets cooked, not binned.', img: 'palak-paneer' },
+  { time: 'Sunday', icon: CalendarDays, title: 'Weekly prep', text: 'Plan the whole week and get one combined shopping list for the kirana or your app.', img: 'meal-prep' },
 ]
 
 const BENEFITS = [
-  { icon: PiggyBank, title: 'Spend less', text: 'Buy only what is missing, not a second jar of what is already at the back of the shelf.' },
-  { icon: Recycle, title: 'Waste less', text: 'Ingredients that need using soon are pushed to the top of every suggestion.' },
-  { icon: Timer, title: 'Decide faster', text: 'Skip the 20 minutes of staring into the fridge. Get ideas in seconds.' },
-  { icon: HeartPulse, title: 'Eat your way', text: 'Veg, vegan, eggetarian, allergies and dislikes are respected every time.' },
+  ['Spend less', 'Buy only what’s missing'],
+  ['Waste less', 'Use-soon items come first'],
+  ['Decide faster', 'Ideas in seconds'],
+  ['Eat your way', 'Diet & allergies respected'],
 ]
 
-const FEATURES = [
-  { icon: Sparkles, title: 'Photo ingredient detection', text: 'Vision AI identifies visible food and tells you how sure it is.' },
-  { icon: ChefHat, title: 'Recipes from what you have', text: 'Every recipe shows what you have, what is missing and what is optional.' },
-  { icon: CalendarDays, title: 'Weekly meal planner', text: 'Breakfast, lunch, dinner and snacks, with less repetition. Swap any meal without touching the rest.' },
-  { icon: ShoppingBasket, title: 'Smart shopping list', text: 'Combines quantities across meals and never mixes units that cannot be converted.' },
-  { icon: ShoppingCart, title: 'Order what’s missing', text: 'Open each missing item in Blinkit, Zepto, Instamart, BigBasket or JioMart, or send the list to your kirana.' },
-  { icon: ShieldCheck, title: 'Respects your diet', text: 'Vegetarian, vegan, eggetarian, allergies and exclusions are applied to every suggestion.' },
-  { icon: Wallet, title: 'Fits your week', text: 'Set servings, cooking time and a weekly budget for your household.' },
-  { icon: Clock, title: 'Use-soon reminders', text: 'Add expiry dates and see what to cook first, right on your dashboard.' },
+const FEATURES: { icon: LucideIcon; title: string; text: string }[] = [
+  { icon: ScanLine, title: 'AI fridge scan', text: 'Vision AI spots dal, spices, paneer and more, and tells you how sure it is.' },
+  { icon: Package, title: 'Smart pantry', text: 'Know what’s in stock, how much, and when it expires, without opening every cupboard.' },
+  { icon: UtensilsCrossed, title: 'Recipe matching', text: 'Every recipe shows what you have, what’s missing and what’s optional.' },
+  { icon: CalendarCheck, title: 'Meal planner', text: 'Breakfast, lunch, dinner and snacks for the week. Swap any meal without redoing the rest.' },
+  { icon: ListChecks, title: 'Auto shopping list', text: 'Built from your plan and current stock, with quantities combined across meals.' },
+  { icon: Truck, title: 'One-tap ordering', text: 'Open missing items in Blinkit, Zepto or Instamart, or WhatsApp the list to your kirana.' },
+  { icon: BellRing, title: 'Expiry reminders', text: 'Items close to their date are pushed to the top of your dashboard and recipes.' },
+  { icon: ShieldCheck, title: 'Diet & allergy aware', text: 'Veg, vegan, eggetarian and your allergies and dislikes are applied to every idea.' },
 ]
 
 const EXAMPLES = [
-  { title: 'Paneer Bhurji', cuisine: 'North Indian', time: '25 min', have: ['paneer', 'onion', 'tomato'], missing: ['green chilli'] },
-  { title: 'Vegetable Pulao', cuisine: 'Indian', time: '35 min', have: ['rice', 'carrot', 'peas', 'onion'], missing: [] },
-  { title: 'Tomato Garlic Pasta', cuisine: 'Italian', time: '25 min', have: ['pasta', 'tomato'], missing: ['garlic'] },
+  { title: 'Kadai Paneer', cuisine: 'North Indian', time: '25 mins', img: 'paneer-curry', match: 95, have: ['Paneer', 'Onion', 'Capsicum'], missing: [] },
+  { title: 'Crispy Beetroot Cutlets', cuisine: 'South Indian', time: '25 mins', img: 'cutlets', match: 88, have: ['Beetroot', 'Potato', 'Peanuts'], missing: [] },
+  { title: 'Garlic Mushroom Stir Fry', cuisine: 'Indo-Chinese', time: '15 mins', img: 'mushroom-stir-fry', match: 70, have: ['Mushroom', 'Garlic'], missing: ['Spring onion'] },
 ]
 
-const ORDER_DEMO = [
-  { name: 'Spinach', qty: '250 g' },
-  { name: 'Fresh cream', qty: '100 ml' },
-  { name: 'Ginger', qty: '1 piece' },
+const SPICES = [
+  { src: 'star-anise', className: 'top-[22%] -left-8 w-24 opacity-25 [animation-duration:8s]' },
+  { src: 'curry-leaf', className: 'bottom-[18%] -right-8 w-32 opacity-25 [animation-duration:10s]' },
+  { src: 'cardamom', className: 'top-[70%] left-[30%] w-20 opacity-10 [animation-duration:12s]' },
+  { src: 'cinnamon', className: 'top-24 right-[24%] w-16 opacity-15 [animation-duration:9s]' },
 ]
 
-function SectionHeading({ eyebrow, title, text, className }: { eyebrow: string; title: string; text?: string; className?: string }) {
-  return (
-    <div className={cn('max-w-2xl', className)}>
-      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-terracotta">{eyebrow}</p>
-      <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">{title}</h2>
-      {text && <p className="mt-3 text-lg text-muted-foreground">{text}</p>}
-    </div>
-  )
+function Eyebrow({ children, className }: { children: string; className?: string }) {
+  return <p className={cn('text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground', className)}>{children}</p>
 }
 
 export function Landing() {
   const { user } = useAuth()
+  const start = user ? '/app' : '/register'
   return (
-    <div className="min-h-dvh overflow-x-clip">
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+    <div className="relative min-h-dvh overflow-x-clip">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+        {SPICES.map((s) => (
+          <img key={s.src} src={`/img/${s.src}.webp`} alt="" className={cn('absolute animate-float', s.className)} />
+        ))}
+      </div>
+
+      <header className="sticky top-0 z-40 border-b border-sage/50 bg-background/90 backdrop-blur-md">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Logo />
-          <nav aria-label="Primary" className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-            <a href="#how" className="hover:text-foreground">How it works</a>
-            <a href="#daily" className="hover:text-foreground">Your day</a>
-            <a href="#order" className="hover:text-foreground">Order</a>
-            <a href="#features" className="hover:text-foreground">Features</a>
+          <nav aria-label="Primary" className="hidden items-center gap-8 text-sm font-semibold text-heading/80 md:flex">
+            <a href="#how" className="hover:text-heading">How it works</a>
+            <a href="#daily" className="hover:text-heading">Your day</a>
+            <a href="#order" className="hover:text-heading">Order</a>
+            <a href="#features" className="hover:text-heading">Features</a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             {user ? (
-              <Button asChild>
+              <Button asChild size="lg">
                 <Link to="/app">Open dashboard</Link>
               </Button>
             ) : (
               <>
-                <Button asChild variant="ghost" className="hidden sm:inline-flex">
-                  <Link to="/login">Sign in</Link>
-                </Button>
-                <Button asChild>
-                  <Link to="/register">Get started</Link>
+                <Link to="/login" className="hidden rounded text-sm font-semibold text-heading hover:text-terracotta sm:block">
+                  Log in
+                </Link>
+                <Button asChild size="lg">
+                  <Link to="/register">Get started free</Link>
                 </Button>
               </>
             )}
@@ -156,357 +125,258 @@ export function Landing() {
         </div>
       </header>
 
-      <main>
+      <main className="relative">
         {/* Hero */}
-        <section className="relative">
-          <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
-            <div className="absolute -left-32 -top-24 size-[30rem] rounded-full bg-sage-soft blur-3xl" />
-            <div className="absolute -right-24 top-24 size-[26rem] rounded-full bg-warn-soft blur-3xl" />
-            <div className="absolute bottom-0 left-1/3 size-72 rounded-full bg-[oklch(0.93_0.04_40)] opacity-60 blur-3xl dark:opacity-20" />
-          </div>
-          <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 pb-20 pt-12 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:pt-20">
-            <div>
-              <Badge variant="sage" className="mb-5 h-7 px-3 text-sm">
-                <Leaf aria-hidden /> For Indian and everyday global kitchens
-              </Badge>
-              <h1 className="text-[2.6rem] font-semibold leading-[1.05] sm:text-6xl lg:text-[4rem]">
-                Cook from what's already in your{' '}
-                <span className="relative whitespace-nowrap text-primary">
-                  fridge
-                  <svg className="absolute -bottom-2 left-0 h-3 w-full text-terracotta" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden>
-                    <path d="M2 9 C 50 2, 120 2, 198 7" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                  </svg>
-                </span>
-                .
-              </h1>
-              <p className="mt-6 font-heading text-xl text-primary sm:text-2xl">Your fridge. Your ingredients. Smarter meals.</p>
-              <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-                Take a photo of your fridge. FridgeAI picks out the ingredients it can see, you confirm them, and it suggests
-                recipes, a weekly meal plan and a shopping list for only what's missing. Order the rest from your favourite app.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="h-12 px-6 text-base shadow-lg shadow-primary/20">
-                  <Link to="/app/scan">
-                    <Camera /> Scan My Fridge
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base">
-                  <Link to="/app/recipes">
-                    Explore Recipes <ArrowRight />
-                  </Link>
-                </Button>
-              </div>
-              <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-                {['Free to start', 'Works without a photo too', 'Respects your diet'].map((t) => (
-                  <li key={t} className="flex items-center gap-1.5">
-                    <CheckCircle2 className="size-4 text-ok" aria-hidden /> {t}
-                  </li>
-                ))}
-              </ul>
+        <section className="mx-auto grid max-w-7xl items-center gap-14 px-4 pb-24 pt-14 sm:px-6 lg:grid-cols-2 lg:px-8 lg:pt-24">
+          <div>
+            <span className="inline-block rounded-full bg-sage px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-[#1a3c2f]">
+              Built for Indian kitchens
+            </span>
+            <h1 className="mt-7 text-[3rem] font-medium leading-[1.02] sm:text-7xl lg:text-[5rem]">
+              Cook from what's{' '}
+              <span className="relative inline-block italic text-terracotta">
+                already
+                <span className="absolute inset-x-0 bottom-1 -z-10 h-3 rounded bg-sage/80" aria-hidden />
+              </span>{' '}
+              in your fridge.
+            </h1>
+            <p className="mt-7 max-w-xl text-xl leading-relaxed text-muted-foreground">
+              Snap a photo, let AI find your ingredients, and get mouth-watering recipes you can cook right now. Less waste, more taste.
+            </p>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <Button asChild size="lg" className="h-16 rounded-2xl px-8 text-lg">
+                <Link to="/app/scan">
+                  <Camera className="size-5" /> Scan your fridge
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-16 rounded-2xl border-2 bg-transparent px-8 text-lg text-heading">
+                <a href="#how">
+                  <Play className="size-4 fill-current" /> See how it works
+                </a>
+              </Button>
             </div>
-
-            {/* Visual demo: ingredients become recipes */}
-            <div className="relative mx-2 sm:mx-6" aria-label="Example: detected ingredients turning into recipe suggestions">
-              {FLOATING.map((f) => (
-                <span
-                  key={f.label}
-                  className={cn('animate-float absolute z-10 hidden items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm font-medium shadow-lg sm:flex', f.className)}
-                  aria-hidden
-                >
-                  <span className="text-lg leading-none">{f.emoji}</span> {f.label}
-                </span>
+            <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+              {['Free to start, no card needed', 'Works without a photo too', 'Respects your diet'].map((t) => (
+                <li key={t} className="flex items-center gap-1.5">
+                  <CheckCircle2 className="size-4 text-ok" aria-hidden /> {t}
+                </li>
               ))}
-              <div className="relative rounded-3xl border bg-card/95 p-5 shadow-2xl shadow-primary/10 backdrop-blur">
-                <div className="mb-3 flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2 font-medium">
-                    <span className="grid size-7 place-items-center rounded-lg bg-primary text-primary-foreground">
-                      <Camera className="size-4" aria-hidden />
-                    </span>
-                    Detected in your photo
-                  </span>
-                  <Badge variant="outline">Example</Badge>
+            </ul>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-xl" aria-hidden>
+            <div className="rounded-[2.5rem] bg-card p-4 shadow-2xl shadow-primary/10 ring-1 ring-border">
+              <div className="relative overflow-hidden rounded-[2rem]">
+                <img src="/img/palak-paneer-top.webp" alt="" className="aspect-[4/5] w-full object-cover sm:aspect-square" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/45 via-transparent to-transparent" />
+                <div className="absolute left-5 top-5 flex items-center gap-2 rounded-xl bg-white/95 px-4 py-2.5 text-sm font-semibold text-[#1a3c2f] shadow-lg">
+                  <span className="size-2 rounded-full bg-green-500" /> Paneer detected
                 </div>
-                <ul className="flex flex-wrap gap-2">
-                  {DEMO_INGREDIENTS.map((i) => (
-                    <li key={i.name} className="flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-sm">
-                      <span
-                        className={cn('size-2 rounded-full', i.conf === 'high' ? 'bg-ok' : i.conf === 'medium' ? 'bg-sage' : 'bg-warn')}
-                        aria-hidden
-                      />
-                      {i.name}
-                      {i.conf === 'low' && <span className="text-xs text-warn-foreground">check</span>}
-                    </li>
-                  ))}
-                </ul>
-                <div className="my-4 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-muted-foreground" aria-hidden>
-                  <span className="h-px flex-1 bg-border" />
-                  <Sparkles className="size-4 text-primary" /> becomes
-                  <span className="h-px flex-1 bg-border" />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[
-                    { t: 'Paneer Bhurji', m: '4 of 5 in your kitchen', time: '25 min' },
-                    { t: 'Palak Paneer', m: '5 of 6 in your kitchen', time: '35 min' },
-                  ].map((r) => (
-                    <div key={r.t} className="overflow-hidden rounded-xl border bg-background">
-                      <RecipeArt title={r.t} size="sm" />
-                      <div className="p-3">
-                        <div className="font-heading font-semibold">{r.t}</div>
-                        <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{r.m}</span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="size-3" aria-hidden /> {r.time}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-warn-soft px-3 py-2.5 text-sm">
-                  <span className="text-warn-foreground">
-                    Missing: <strong>green chilli</strong>
-                  </span>
-                  <span className="flex items-center gap-1 rounded-lg bg-[#f8cb46] px-2.5 py-1 text-xs font-semibold text-[#1c1c1c]">
-                    <ShoppingCart className="size-3.5" aria-hidden /> Order
-                  </span>
+                <div className="absolute bottom-5 left-5 rounded-2xl bg-white/95 px-4 py-3 text-[#1a3c2f] shadow-lg">
+                  <div className="text-[0.65rem] font-bold uppercase tracking-wider text-[#b85c38]">Ready to cook</div>
+                  <div className="font-heading text-lg">Palak Paneer</div>
+                  <div className="text-xs text-[#6b6862]">You have 8 of 10 ingredients</div>
                 </div>
               </div>
+            </div>
+            <div className="absolute -right-3 top-1/2 w-40 animate-float rounded-2xl bg-card p-4 shadow-xl ring-1 ring-border sm:-right-8">
+              <div className="flex items-center gap-2 text-sm font-semibold text-heading">🍅 Tomato</div>
+              <div className="mt-2 h-1.5 rounded-full bg-muted">
+                <div className="h-full w-4/5 rounded-full bg-terracotta" />
+              </div>
+              <div className="mt-2 text-xs font-semibold text-terracotta">Use in 2 days</div>
             </div>
           </div>
         </section>
 
+        {/* Order strip */}
+        <section id="order" className="scroll-mt-20 border-y border-border/70 bg-card/80">
+          <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+            <div>
+              <Eyebrow>Missing something?</Eyebrow>
+              <h2 className="mt-1 text-2xl font-medium">Order in minutes</h2>
+            </div>
+            <ul className="flex flex-wrap items-center gap-x-10 gap-y-4">
+              {STORES.map((s) => (
+                <li key={s.id} className="flex items-center gap-2 text-xl font-bold text-muted-foreground/70 transition-colors hover:text-heading">
+                  <span className={cn('grid size-7 place-items-center rounded-lg text-sm', s.tint)} aria-hidden>
+                    {s.name[0]}
+                  </span>
+                  {s.name}
+                </li>
+              ))}
+              <li className="flex items-center gap-2 text-xl font-bold text-muted-foreground/70">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#25d366] text-sm text-white" aria-hidden>
+                  W
+                </span>
+                Your kirana
+              </li>
+            </ul>
+          </div>
+          <p className="pb-6 text-center text-xs text-muted-foreground">
+            We're not affiliated with these services. FridgeAI opens each item in the app you choose; you add it to your cart and pay there.
+          </p>
+        </section>
+
         {/* How it works */}
-        <section id="how" className="scroll-mt-16 border-y bg-card/60 py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <SectionHeading eyebrow="How it works" title="From fridge to plate in three steps" />
-            <ol className="relative mt-10 grid gap-5 md:grid-cols-3">
-              <span className="absolute left-[16%] right-[16%] top-[3.1rem] hidden h-px border-t-2 border-dashed border-border md:block" aria-hidden />
-              {STEPS.map((s, i) => (
-                <li key={s.title} className="relative rounded-2xl border bg-background p-6 transition-transform hover:-translate-y-1">
-                  <div className="mb-4 flex items-center gap-3">
-                    <span className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-md shadow-primary/20">
-                      <s.icon className="size-5" aria-hidden />
-                    </span>
-                    <span className="font-heading text-3xl text-muted-foreground/50">0{i + 1}</span>
-                  </div>
-                  <h3 className="text-xl font-semibold">{s.title}</h3>
-                  <p className="mt-2 text-muted-foreground">{s.text}</p>
+        <section id="how" className="scroll-mt-20 py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-4xl font-medium sm:text-5xl">Magic for your kitchen</h2>
+              <p className="mt-4 text-lg text-muted-foreground">Three simple steps from a full fridge to a delicious meal.</p>
+            </div>
+            <ol className="mt-16 grid gap-8 md:grid-cols-3">
+              {STEPS.map(({ icon: Icon, tone, title, text }) => (
+                <li key={title} className="rounded-3xl border bg-card p-8 shadow-lg shadow-primary/5 transition-transform hover:-translate-y-1">
+                  <span className={cn('grid size-16 place-items-center rounded-2xl', tone)}>
+                    <Icon className="size-7" aria-hidden />
+                  </span>
+                  <h3 className="mt-7 text-2xl font-medium">{title}</h3>
+                  <p className="mt-4 leading-relaxed text-muted-foreground">{text}</p>
                 </li>
               ))}
             </ol>
           </div>
         </section>
 
-        {/* Daily life */}
-        <section id="daily" className="mx-auto max-w-6xl scroll-mt-16 px-4 py-20 sm:px-6">
-          <SectionHeading
-            eyebrow="Made for real days"
-            title="A day with FridgeAI"
-            text="For students, hostel kitchens, busy professionals and families. Here is where it helps, from the first chai to the last plate."
-          />
-          <ol className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {DAY.map((d) => (
-              <li key={d.title} className="group overflow-hidden rounded-2xl border bg-card shadow-(--shadow-card) transition-all hover:-translate-y-1 hover:shadow-xl">
-                <div className={cn('relative flex h-28 items-end justify-between bg-linear-to-br p-4 dark:opacity-85', d.tone)}>
-                  <span className="absolute -right-6 -top-6 size-24 rounded-full bg-white/30" aria-hidden />
-                  <d.icon className="relative size-9 text-[oklch(0.3_0.04_160)]" strokeWidth={1.6} aria-hidden />
-                  <span className="relative rounded-full bg-white/70 px-2.5 py-1 text-xs font-semibold text-[oklch(0.3_0.04_160)]">{d.time}</span>
-                </div>
-                <div className="p-5">
-                  <h3 className="text-lg font-semibold leading-snug">{d.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{d.text}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-8 grid gap-4 rounded-3xl border bg-sage-soft/60 p-6 sm:grid-cols-2 sm:p-8 lg:grid-cols-4">
-            {BENEFITS.map((b) => (
-              <div key={b.title} className="flex gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-primary shadow-sm">
-                  <b.icon className="size-5" aria-hidden />
-                </span>
-                <div>
-                  <h3 className="font-sans text-base font-semibold">{b.title}</h3>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{b.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Order */}
-        <section id="order" className="scroll-mt-16 bg-primary py-20 text-primary-foreground">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] opacity-75">Missing something?</p>
-              <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">Order what's missing in a few taps</h2>
-              <p className="mt-3 text-lg opacity-85">
-                Pick your app and FridgeAI opens each missing ingredient right there. Add to cart, pay in the app, and it's on
-                its way. Prefer your local kirana? Send them the whole list on WhatsApp.
-              </p>
-              <ul className="mt-6 flex flex-wrap gap-2" aria-label="Supported apps">
-                {STORES.map((s) => (
-                  <li key={s.id} className="flex items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 text-sm font-medium">
-                    <span className={cn('grid size-6 place-items-center rounded-full text-xs font-bold', s.tint)} aria-hidden>
-                      {s.name[0]}
-                    </span>
-                    {s.name}
-                  </li>
-                ))}
-                <li className="flex items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 text-sm font-medium">
-                  <span className="grid size-6 place-items-center rounded-full bg-[#25d366] text-xs font-bold text-white" aria-hidden>
-                    W
-                  </span>
-                  WhatsApp to kirana
+        {/* Your day */}
+        <section id="daily" className="scroll-mt-20 bg-[#f4f3ee]/80 py-24 dark:bg-card/40">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 className="max-w-2xl text-4xl font-medium leading-tight sm:text-5xl">Your personalized meal lifecycle</h2>
+            <p className="mt-4 text-lg text-muted-foreground">From morning breakfast to tiffin boxes, we've got your day planned.</p>
+            <ul className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {DAY.map(({ time, icon: Icon, title, text, img }) => (
+                <li key={time} className="flex flex-col rounded-3xl border bg-card p-6 shadow-lg shadow-primary/5">
+                  <div className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-terracotta">
+                    <Icon className="size-4" aria-hidden /> {time}
+                  </div>
+                  <h3 className="mt-4 text-xl font-medium">{title}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{text}</p>
+                  <img src={`/img/${img}.webp`} alt="" loading="lazy" className="mt-6 aspect-[3/2] w-full rounded-2xl object-cover" />
                 </li>
-              </ul>
-              <p className="mt-4 text-xs opacity-70">Store names belong to their owners. FridgeAI is not affiliated with them.</p>
-            </div>
-            <div className="rounded-3xl bg-card p-5 text-card-foreground shadow-2xl" aria-label="Example order">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="font-heading text-lg font-semibold">Missing for Palak Paneer</span>
-                <Badge variant="outline">Example</Badge>
-              </div>
-              <div className="mb-3 flex gap-2" aria-hidden>
-                {STORES.slice(0, 3).map((s, i) => (
-                  <span key={s.id} className={cn('flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium', i === 0 && 'border-primary ring-2 ring-primary/20')}>
-                    <span className={cn('grid size-5 place-items-center rounded text-[0.65rem] font-bold', s.tint)}>{s.name[0]}</span>
-                    {s.name}
-                  </span>
-                ))}
-              </div>
-              <ul className="divide-y rounded-xl border">
-                {ORDER_DEMO.map((i) => (
-                  <li key={i.name} className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm">
-                    <span>
-                      <span className="font-medium">{i.name}</span> <span className="text-muted-foreground">{i.qty}</span>
-                    </span>
-                    <span className="flex items-center gap-1 rounded-md border px-2 py-1 text-xs">
-                      <ExternalLink className="size-3" aria-hidden /> Find on Blinkit
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 flex items-center justify-between rounded-xl bg-muted px-3 py-2.5 text-sm">
-                <span className="text-muted-foreground">Then just pay in the app</span>
-                <CheckCircle2 className="size-5 text-ok" aria-hidden />
-              </div>
-            </div>
+              ))}
+            </ul>
+            <ul className="mt-16 grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
+              {BENEFITS.map(([title, label]) => (
+                <li key={title}>
+                  <div className="font-heading text-3xl text-heading sm:text-4xl">{title}</div>
+                  <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
         {/* Features */}
-        <section id="features" className="mx-auto max-w-6xl scroll-mt-16 px-4 py-20 sm:px-6">
-          <SectionHeading eyebrow="Features" title="Everything between the fridge and the plate" />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="rounded-2xl border bg-card p-6 shadow-(--shadow-card) transition-all hover:-translate-y-1 hover:border-primary/30">
-                <span className="mb-4 grid size-11 place-items-center rounded-xl bg-sage-soft text-primary">
-                  <f.icon className="size-5" aria-hidden />
-                </span>
-                <h3 className="text-lg font-semibold">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{f.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Example recipes */}
-        <section id="recipes" className="bg-secondary/50 py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <SectionHeading eyebrow="Recipes" title="Recipes that start with your shelf" text="Example cards. Yours are generated from the ingredients you confirm." />
-              <Button asChild variant="outline">
-                <Link to="/app/recipes">
-                  Explore recipes <ArrowRight />
-                </Link>
-              </Button>
+        <section id="features" className="scroll-mt-20 bg-sidebar py-24 text-white">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-4xl font-medium text-white sm:text-5xl">Every tool for the home chef</h2>
+              <p className="mt-4 text-lg text-white/65">Everything an Indian household needs to plan, cook and shop with less effort.</p>
             </div>
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {EXAMPLES.map((r) => (
-                <article key={r.title} className="overflow-hidden rounded-2xl border bg-card shadow-(--shadow-card) transition-all hover:-translate-y-1 hover:shadow-xl">
-                  <RecipeArt title={r.title} />
-                  <div className="p-5">
-                    <div className="mb-2 flex gap-1.5">
-                      <Badge variant="outline">{r.cuisine}</Badge>
-                      <Badge variant="outline">
-                        <Clock aria-hidden /> {r.time}
-                      </Badge>
-                    </div>
-                    <h3 className="text-xl font-semibold">{r.title}</h3>
-                    <p className="mt-3 text-sm">
-                      <span className="font-medium text-ok">You have:</span> {r.have.join(', ')}
-                    </p>
-                    <p className="mt-1 text-sm">
-                      <span className="font-medium text-warn-foreground">Missing:</span> {r.missing.length ? r.missing.join(', ') : 'nothing'}
-                    </p>
-                  </div>
-                </article>
+            <ul className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURES.map(({ icon: Icon, title, text }) => (
+                <li key={title} className="rounded-3xl border border-white/10 bg-white/5 p-8 transition-colors hover:bg-white/8">
+                  <Icon className="size-7 text-[#df8a64]" aria-hidden />
+                  <h3 className="mt-6 font-sans text-xl font-bold tracking-normal text-white">{title}</h3>
+                  <p className="mt-3 leading-relaxed text-white/65">{text}</p>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
 
-        {/* Food waste */}
-        <section id="waste" className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2">
-          <div>
-            <Recycle className="mb-4 size-9 text-primary" aria-hidden />
-            <h2 className="text-3xl font-semibold sm:text-4xl">Use it before you lose it</h2>
-            <p className="mt-3 text-lg text-muted-foreground">
-              Mark the spinach that's wilting or the paneer that needs using. FridgeAI puts those first in recipes and meal plans,
-              so food gets eaten instead of thrown away.
-            </p>
-          </div>
-          <ul className="space-y-3">
-            {[
-              'Ingredients marked “use soon” rank recipes higher',
-              'Meal plans track how much stock each meal uses',
-              'Shopping lists skip what you already have',
-              'Unknown quantities are flagged, never assumed unlimited',
-            ].map((t) => (
-              <li key={t} className="flex items-start gap-3 rounded-xl border bg-card p-4">
-                <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
-                <span>{t}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
-          <div className="relative flex flex-col items-start justify-between gap-6 overflow-hidden rounded-3xl bg-primary p-8 text-primary-foreground sm:flex-row sm:items-center sm:p-12">
-            <span className="absolute -right-10 -top-16 size-56 rounded-full bg-white/10" aria-hidden />
-            <span className="absolute -bottom-20 right-40 size-40 rounded-full bg-white/5" aria-hidden />
-            <div className="relative">
-              <h2 className="text-3xl font-semibold sm:text-4xl">What's for dinner tonight?</h2>
-              <p className="mt-2 opacity-85">Open your fridge, take a photo and find out.</p>
-            </div>
-            <Button asChild size="lg" variant="secondary" className="relative h-12 px-6 text-base">
-              <Link to="/app/scan">
-                <Camera /> Scan My Fridge
+        {/* Recipes */}
+        <section className="py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-4xl font-medium sm:text-5xl">
+                  Recipes you can cook <span className="italic text-terracotta">right now</span>
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground">No supermarket run required. Just your fridge and your stove. (Examples.)</p>
+              </div>
+              <Link to={start} className="self-start rounded border-b-2 border-terracotta pb-1 font-bold text-heading hover:text-terracotta sm:self-auto">
+                Find yours
               </Link>
-            </Button>
+            </div>
+            <ul className="mt-14 grid gap-8 md:grid-cols-3">
+              {EXAMPLES.map((r) => (
+                <li key={r.title} className="group">
+                  <div className="relative overflow-hidden rounded-3xl shadow-lg shadow-primary/10">
+                    <img src={`/img/${r.img}.webp`} alt={r.title} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <span className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-sm font-semibold text-[#1a3c2f] shadow">
+                      <span className={cn('size-2 rounded-full', r.match >= 80 ? 'bg-green-500' : 'bg-amber-500')} /> Match: {r.match}%
+                    </span>
+                  </div>
+                  <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                    <span className="text-terracotta">{r.cuisine}</span>
+                    <span className="text-muted-foreground">• {r.time}</span>
+                  </div>
+                  <h3 className="mt-2 text-3xl font-medium">{r.title}</h3>
+                  <ul className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                    {r.have.map((i) => (
+                      <li key={i} className="rounded-md bg-sage-soft px-2.5 py-1 text-heading">
+                        {i}
+                      </li>
+                    ))}
+                    {r.missing.map((i) => (
+                      <li key={i} className="rounded-md bg-terracotta/10 px-2.5 py-1 text-terracotta">
+                        Missing: {i}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Closing CTA */}
+        <section className="px-4 pb-24 sm:px-6">
+          <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-linear-to-br from-[#eef1ea] to-[#e6ece3] px-6 py-20 text-center dark:from-card dark:to-card">
+            <span className="absolute -left-16 -top-16 size-64 rounded-full bg-terracotta/10 blur-2xl" aria-hidden />
+            <span className="absolute -bottom-20 -right-16 size-72 rounded-full bg-primary/10 blur-2xl" aria-hidden />
+            <h2 className="relative mx-auto max-w-2xl text-4xl font-medium leading-tight sm:text-6xl">Ready to stop wasting and start cooking?</h2>
+            <div className="relative mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row">
+              <Button asChild size="lg" className="h-16 rounded-2xl px-10 text-lg">
+                <Link to={start}>{user ? 'Open your dashboard' : 'Get started free'}</Link>
+              </Button>
+              <span className="font-semibold text-heading">Free to use. No card needed.</span>
+            </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 text-sm text-muted-foreground sm:flex-row sm:justify-between sm:px-6">
+      <footer className="relative bg-sidebar text-white">
+        <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 md:grid-cols-[2fr_1fr_1fr] lg:px-8">
           <div>
-            <Logo />
-            <p className="mt-2 max-w-xs">Your fridge. Your ingredients. Smarter meals.</p>
+            <Logo inverted />
+            <p className="mt-6 max-w-sm leading-relaxed text-white/70">
+              Helping Indian households cook smarter, save money and waste less food, with a little help from AI.
+            </p>
           </div>
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-10 gap-y-2">
-            <Link to="/app/scan" className="hover:text-foreground">Scan fridge</Link>
-            <Link to="/app/recipes" className="hover:text-foreground">Recipes</Link>
-            <Link to="/app/planner" className="hover:text-foreground">Meal planner</Link>
-            <Link to="/app/shopping" className="hover:text-foreground">Shopping list</Link>
-            <Link to="/login" className="hover:text-foreground">Sign in</Link>
-            <Link to="/register" className="hover:text-foreground">Create account</Link>
-          </nav>
+          <div>
+            <h2 className="font-sans text-base font-bold tracking-normal text-[#df8a64]">Product</h2>
+            <ul className="mt-5 space-y-3 text-white/70">
+              <li><a href="#how" className="hover:text-white">How it works</a></li>
+              <li><a href="#daily" className="hover:text-white">Your day</a></li>
+              <li><a href="#order" className="hover:text-white">Order</a></li>
+              <li><a href="#features" className="hover:text-white">Features</a></li>
+            </ul>
+          </div>
+          <div>
+            <h2 className="font-sans text-base font-bold tracking-normal text-[#df8a64]">Account</h2>
+            <ul className="mt-5 space-y-3 text-white/70">
+              <li><Link to="/login" className="hover:text-white">Log in</Link></li>
+              <li><Link to="/register" className="hover:text-white">Create account</Link></li>
+              <li><Link to="/app/scan" className="hover:text-white">Scan your fridge</Link></li>
+            </ul>
+          </div>
         </div>
-        <p className="border-t px-4 py-4 text-center text-xs text-muted-foreground">
-          AI suggestions can be wrong. FridgeAI does not judge food freshness or safety, and recipes are not guaranteed allergen-free.
-        </p>
+        <div className="mx-auto max-w-7xl border-t border-white/10 px-4 py-8 text-xs font-semibold uppercase tracking-wider text-white/45 sm:px-6 lg:px-8">
+          © {new Date().getFullYear()} FridgeAI. Recipes are AI-generated; always check labels for allergens.
+        </div>
       </footer>
     </div>
   )

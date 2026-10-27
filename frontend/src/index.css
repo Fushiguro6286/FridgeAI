@@ -1,14 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/plus-jakarta-sans";
 @import "@fontsource-variable/fraunces";
 
 @custom-variant dark (&:is(.dark *));
 
 /* FridgeAI design tokens. Components only use these names, never raw colours. */
 @theme inline {
-  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
   --font-heading: 'Fraunces Variable', Georgia, serif;
   --color-ring: var(--ring);
   --color-input: var(--input);
@@ -36,6 +36,9 @@
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-terracotta: var(--terracotta);
+  --color-heading: var(--heading);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -47,62 +50,69 @@
 }
 
 :root {
+  /* Palette from the UX Pilot design: forest green, warm ivory, charcoal, sage, terracotta. */
   --radius: 0.75rem;
-  --background: oklch(0.977 0.011 85);      /* warm ivory */
-  --foreground: oklch(0.255 0.008 250);     /* charcoal */
-  --card: oklch(0.994 0.005 85);
+  --background: #fcfaf5;
+  --foreground: #333333;
+  --heading: #1a3c2f;
+  --card: #ffffff;
   --card-foreground: var(--foreground);
-  --popover: oklch(0.994 0.005 85);
+  --popover: #ffffff;
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.385 0.068 160);        /* deep forest green */
-  --primary-foreground: oklch(0.985 0.008 85);
-  --secondary: oklch(0.935 0.022 140);      /* pale sage */
-  --secondary-foreground: oklch(0.32 0.06 160);
-  --muted: oklch(0.952 0.012 85);
-  --muted-foreground: oklch(0.48 0.014 250);
-  --accent: oklch(0.925 0.028 145);
-  --accent-foreground: oklch(0.3 0.055 160);
-  --destructive: oklch(0.55 0.19 28);
-  --border: oklch(0.9 0.013 85);
-  --input: oklch(0.88 0.014 85);
-  --ring: oklch(0.55 0.08 155);
-  --sage: oklch(0.7 0.055 145);
-  --sage-soft: oklch(0.94 0.025 140);
-  --warn: oklch(0.72 0.14 70);
-  --warn-soft: oklch(0.95 0.045 80);
-  --warn-foreground: oklch(0.43 0.09 60);
-  --ok: oklch(0.52 0.11 155);
-  --ok-soft: oklch(0.94 0.04 155);
-  --terracotta: oklch(0.65 0.12 45);
+  --primary: #1a3c2f;
+  --primary-foreground: #ffffff;
+  --secondary: #eef3ec;
+  --secondary-foreground: #1a3c2f;
+  --muted: #f5f2eb;
+  --muted-foreground: #6b6862;
+  --accent: #e8f0e6;
+  --accent-foreground: #1a3c2f;
+  --destructive: #c53030;
+  --border: #ebe6db;
+  --input: #e4ded2;
+  --ring: #3e6b58;
+  --sage: #d4e2d4;
+  --sage-soft: #eef3ec;
+  --warn: #f59e0b;
+  --warn-soft: #fef4e4;
+  --warn-foreground: #b45309;
+  --ok: #15803d;
+  --ok-soft: #e8f5ec;
+  --terracotta: #b85c38;
+  --sidebar: #1a3c2f;
+  --sidebar-foreground: #ffffff;
 }
 
 .dark {
-  --background: oklch(0.185 0.012 165);
-  --foreground: oklch(0.95 0.01 85);
-  --card: oklch(0.225 0.014 165);
+  --background: #0f1c17;
+  --foreground: #ece8df;
+  --heading: #f4f0e7;
+  --card: #15261f;
   --card-foreground: var(--foreground);
-  --popover: oklch(0.235 0.014 165);
+  --popover: #182b23;
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.78 0.09 150);
-  --primary-foreground: oklch(0.2 0.03 165);
-  --secondary: oklch(0.29 0.025 160);
-  --secondary-foreground: oklch(0.92 0.02 140);
-  --muted: oklch(0.26 0.014 165);
-  --muted-foreground: oklch(0.74 0.015 140);
-  --accent: oklch(0.3 0.03 155);
-  --accent-foreground: oklch(0.94 0.02 140);
-  --destructive: oklch(0.7 0.17 25);
-  --border: oklch(1 0 0 / 11%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.7 0.08 150);
-  --sage: oklch(0.65 0.05 145);
-  --sage-soft: oklch(0.28 0.03 150);
-  --warn: oklch(0.78 0.13 75);
-  --warn-soft: oklch(0.3 0.05 70);
-  --warn-foreground: oklch(0.88 0.1 80);
-  --ok: oklch(0.75 0.12 155);
-  --ok-soft: oklch(0.29 0.04 155);
-  --terracotta: oklch(0.7 0.11 45);
+  --primary: #8fcaa8;
+  --primary-foreground: #0f1c17;
+  --secondary: #1f362c;
+  --secondary-foreground: #e3efe6;
+  --muted: #1a2d25;
+  --muted-foreground: #a7b3ab;
+  --accent: #213a2f;
+  --accent-foreground: #e3efe6;
+  --destructive: #f07167;
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 15%);
+  --ring: #8fcaa8;
+  --sage: #4d6b5a;
+  --sage-soft: #1f362c;
+  --warn: #fbbf24;
+  --warn-soft: #3a2d14;
+  --warn-foreground: #fcd38a;
+  --ok: #6fd39a;
+  --ok-soft: #173a28;
+  --terracotta: #df8a64;
+  --sidebar: #0b1611;
+  --sidebar-foreground: #ffffff;
 }
 
 @layer base {
@@ -114,9 +124,16 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Subtle paper grain from the design. */
+    background-image: linear-gradient(color-mix(in srgb, var(--background) 55%, transparent), color-mix(in srgb, var(--background) 55%, transparent)), url('/img/paper.webp');
+    background-size: auto, 720px;
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image: none;
   }
   h1, h2, h3 {
-    @apply font-heading tracking-tight;
+    @apply font-heading tracking-tight text-heading;
     font-optical-sizing: auto;
   }
   button:not(:disabled), [role="button"]:not(:disabled) {
@@ -141,4 +158,9 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(300%); }
 }

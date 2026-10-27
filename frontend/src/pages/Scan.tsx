@@ -1,4 +1,4 @@
-import { AlertTriangle, Camera, CheckCircle2, ImagePlus, Keyboard, Loader2, RefreshCw, ScanLine, Upload, X } from 'lucide-react'
+import { AlertTriangle, Camera, CheckCircle2, Circle, CloudUpload, ImagePlus, Keyboard, Loader2, RefreshCw, ScanLine, X } from 'lucide-react'
 import { useEffect, useRef, useState, type DragEvent } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
@@ -128,9 +128,11 @@ export function Scan() {
 
   if (phase === 'done') {
     return (
-      <div className="mx-auto max-w-xl py-10 text-center">
-        <CheckCircle2 className="mx-auto mb-4 size-14 text-ok" aria-hidden />
-        <h1 className="text-3xl font-semibold">Ingredients saved</h1>
+      <div className="mx-auto max-w-xl rounded-[2rem] border bg-card px-6 py-14 text-center shadow-(--shadow-card)">
+        <span className="mx-auto mb-5 grid size-20 place-items-center rounded-full bg-ok-soft">
+          <CheckCircle2 className="size-10 text-ok" aria-hidden />
+        </span>
+        <h1 className="text-4xl font-medium">Ingredients saved</h1>
         <p className="mt-2 text-muted-foreground">
           {savedCount} ingredient{savedCount === 1 ? ' is' : 's are'} now in your inventory.
         </p>
@@ -154,11 +156,11 @@ export function Scan() {
     <div>
       {inputs}
       <PageHeader
-        title={reviewing ? 'Review ingredients' : 'Scan your fridge'}
+        title={reviewing ? 'Review detected items' : 'Scan your fridge'}
         description={
           reviewing
             ? 'These are suggestions. Edit names, fix quantities, remove mistakes and add anything the photo missed. Nothing is saved until you confirm.'
-            : 'Upload a clear photo of your open fridge or pantry shelf. We only list food we can see, and the photo is not stored.'
+            : "Upload a photo and we'll tell you what's inside. We only list food we can see, and the photo isn't stored."
         }
         actions={
           reviewing ? (
@@ -202,10 +204,10 @@ export function Scan() {
       )}
 
       {reviewing ? (
-        <div className="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <div className={cn('grid gap-8', preview && 'xl:grid-cols-[16rem_minmax(0,1fr)]')}>
           {preview && (
-            <div className="lg:sticky lg:top-6 lg:self-start">
-              <img src={preview} alt="Your fridge photo" className="w-full rounded-xl border object-cover" />
+            <div className="xl:sticky xl:top-6 xl:self-start">
+              <img src={preview} alt="Your fridge photo" className="w-full rounded-3xl border-4 border-card object-cover shadow-lg" />
               {detection?.mock && <MockBadge className="mt-3" />}
               {detection?.model && <p className="mt-2 text-xs text-muted-foreground">Identified by {detection.model}. Confidence is the AI's own estimate, not a measured probability.</p>}
             </div>
@@ -244,63 +246,84 @@ export function Scan() {
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           className={cn(
-            'flex flex-col items-center rounded-3xl border-2 border-dashed bg-card px-6 py-14 text-center transition-colors',
-            dragging ? 'border-primary bg-sage-soft' : 'border-border',
+            'mx-auto flex max-w-4xl flex-col items-center rounded-[2.5rem] border-2 border-dashed bg-card/50 px-6 py-16 text-center backdrop-blur-sm transition-colors sm:py-20',
+            dragging ? 'border-primary bg-sage-soft' : 'border-sage',
           )}
         >
-          <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-sage-soft text-primary">
-            <ScanLine className="size-8" aria-hidden />
+          <span className="mb-8 grid size-24 place-items-center rounded-3xl bg-sage-soft text-primary shadow-inner">
+            <CloudUpload className="size-11" aria-hidden />
           </span>
-          <h2 className="text-2xl font-semibold">Drop a fridge photo here</h2>
-          <p className="mt-1 text-muted-foreground">JPG, PNG or WEBP, up to {maxMb} MB</p>
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-            <Button size="lg" onClick={() => pickRef.current?.click()} disabled={!aiReady}>
-              <Upload /> Choose photo
+          <h2 className="text-3xl font-medium sm:text-4xl">Drop a fridge photo here</h2>
+          <p className="mt-4 max-w-md leading-relaxed text-muted-foreground">
+            Make sure the light is clear and all items are visible.
+            <br />
+            Supports JPG, PNG or WEBP up to {maxMb} MB.
+          </p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <Button size="lg" className="h-14 rounded-2xl px-9 text-base" onClick={() => pickRef.current?.click()} disabled={!aiReady}>
+              Choose from device
             </Button>
-            <Button size="lg" variant="outline" onClick={() => cameraRef.current?.click()} disabled={!aiReady}>
+            <Button size="lg" variant="outline" className="h-14 rounded-2xl px-7 text-base" onClick={() => cameraRef.current?.click()} disabled={!aiReady}>
               <Camera /> Take photo
             </Button>
           </div>
-          <ul className="mt-8 grid max-w-lg gap-1 text-left text-sm text-muted-foreground">
-            <li>• Open the door fully and use good light</li>
-            <li>• One shelf at a time gives the best results</li>
-            <li>• Closed containers can't be identified, so add those by hand</li>
+          <ul className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <li>• Open the door fully</li>
+            <li>• One shelf at a time works best</li>
+            <li>• Add closed containers by hand</li>
           </ul>
         </div>
       ) : (
-        <div className="mx-auto max-w-2xl">
-          <div className="relative overflow-hidden rounded-3xl border bg-card">
-            {preview && <img src={preview} alt="Selected fridge photo" className={cn('max-h-[60dvh] w-full object-contain', phase !== 'preview' && 'opacity-60')} />}
+        <div className="mx-auto grid max-w-5xl items-center gap-10 rounded-[2.5rem] border bg-card p-6 shadow-(--shadow-card) sm:p-10 md:grid-cols-2">
+          <div className="relative overflow-hidden rounded-3xl bg-muted shadow-lg">
+            {preview && <img src={preview} alt="Selected fridge photo" className="aspect-square w-full object-cover" />}
+            {phase !== 'preview' && (
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-1/3 animate-[scan_2.4s_ease-in-out_infinite] bg-linear-to-b from-transparent to-white/40" aria-hidden />
+            )}
             {phase === 'preview' && (
-              <Button variant="secondary" size="icon" className="absolute right-3 top-3" onClick={reset} aria-label="Remove photo">
+              <Button variant="secondary" size="icon" className="absolute right-3 top-3 rounded-full" onClick={reset} aria-label="Remove photo">
                 <X />
               </Button>
             )}
-            {(phase === 'uploading' || phase === 'analyzing') && (
-              <div className="absolute inset-x-0 bottom-0 bg-card/95 p-5" role="status" aria-live="polite">
-                <div className="mb-2 flex items-center gap-2 font-medium">
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
-                  {phase === 'uploading' ? `Uploading… ${Math.round(progress * 100)}%` : 'Identifying ingredients… this can take a few seconds'}
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} aria-label="Upload progress">
-                  <div className={cn('h-full rounded-full bg-primary transition-all', phase === 'analyzing' && 'animate-pulse')} style={{ width: `${phase === 'analyzing' ? 100 : progress * 100}%` }} />
-                </div>
-              </div>
-            )}
           </div>
-          {phase === 'preview' && (
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-between">
-              <Button variant="outline" onClick={() => pickRef.current?.click()}>
-                <ImagePlus /> Replace photo
-              </Button>
-              <Button size="lg" onClick={analyze}>
-                <ScanLine /> Identify ingredients
-              </Button>
+          {phase === 'preview' ? (
+            <div>
+              <h2 className="text-3xl font-medium sm:text-4xl">Looks good?</h2>
+              <p className="mt-4 leading-relaxed text-muted-foreground">
+                We'll list the food we can see. You'll review everything before it's saved.
+              </p>
+              <div className="mt-8 flex flex-col gap-3">
+                <Button size="lg" className="h-14 rounded-2xl text-base" onClick={analyze}>
+                  <ScanLine /> Identify ingredients
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => pickRef.current?.click()}>
+                  <ImagePlus /> Replace photo
+                </Button>
+              </div>
             </div>
-          )}
-          {(phase === 'uploading' || phase === 'analyzing') && (
-            <div className="mt-4 text-center">
-              <Button variant="ghost" onClick={reset}>
+          ) : (
+            <div role="status" aria-live="polite">
+              <h2 className="text-3xl font-medium sm:text-4xl">Finding ingredients…</h2>
+              <p className="mt-4 leading-relaxed text-muted-foreground">
+                Our AI is identifying vegetables, dairy and spices. Hang tight, this usually takes a few seconds.
+              </p>
+              <ul className="mt-8 space-y-4 text-[0.95rem] font-semibold">
+                {[
+                  ['Uploading photo', phase === 'uploading' ? 'active' : 'done'],
+                  ['Identifying ingredients', phase === 'analyzing' ? 'active' : 'todo'],
+                  ['Ready for your review', 'todo'],
+                ].map(([label, state]) => (
+                  <li key={label} className={cn('flex items-center gap-3', state === 'done' ? 'text-ok' : state === 'active' ? 'text-heading' : 'text-muted-foreground/60')}>
+                    {state === 'done' ? <CheckCircle2 className="size-5" aria-hidden /> : state === 'active' ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <Circle className="size-5" aria-hidden />}
+                    {label}
+                    {label === 'Uploading photo' && phase === 'uploading' && ` ${Math.round(progress * 100)}%`}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} aria-label="Upload progress">
+                <div className={cn('h-full rounded-full bg-primary transition-all', phase === 'analyzing' && 'animate-pulse')} style={{ width: `${phase === 'analyzing' ? 70 : progress * 40}%` }} />
+              </div>
+              <Button variant="ghost" className="mt-6" onClick={reset}>
                 Cancel
               </Button>
             </div>

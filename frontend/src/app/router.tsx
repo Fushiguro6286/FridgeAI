@@ -16,10 +16,12 @@ function Root() {
 export const router = createBrowserRouter([
   {
     element: <Root />,
+    HydrateFallback: () => null, // lazy pages load in a blink; silences React Router's first-load warning
     children: [
       { path: '/', element: <Landing /> },
       { path: '/login', element: <Login /> },
       { path: '/register', element: <Register /> },
+      { path: '/notepad', lazy: async () => ({ Component: (await import('@/pages/Notepad')).Notepad }) },
       {
         path: '/app',
         element: (

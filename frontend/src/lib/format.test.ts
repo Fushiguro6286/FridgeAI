@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, formatMinutes, formatQty, scaleQty } from '@/lib/format'
+import { addDays, expiryLabel, formatMinutes, formatQty, isoDate, scaleQty } from '@/lib/format'
 import { groupShopping } from '@/lib/shopping'
 import type { ShoppingItem } from '@/types/api'
 
@@ -51,5 +51,15 @@ describe('groupShopping', () => {
     expect(g.buy.map((i) => i.name)).toEqual(['atta', 'tomato'])
     expect(g.check.map((i) => i.name)).toEqual(['paneer'])
     expect(g.done.map((i) => i.name)).toEqual(['milk'])
+  })
+})
+
+describe('expiryLabel', () => {
+  it('describes days left in plain words', () => {
+    expect(expiryLabel(null)).toBeNull()
+    expect(expiryLabel(isoDate())).toBe('Expires today')
+    expect(expiryLabel(addDays(isoDate(), 1))).toBe('Expires tomorrow')
+    expect(expiryLabel(addDays(isoDate(), 3))).toBe('Expires in 3 days')
+    expect(expiryLabel(addDays(isoDate(), -1))).toBe('Past expiry date')
   })
 })

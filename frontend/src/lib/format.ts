@@ -15,6 +15,19 @@ export const CATEGORIES: { value: Category; label: string }[] = [
 ]
 export const categoryLabel = (c: string) => CATEGORIES.find((x) => x.value === c)?.label ?? 'Other'
 
+const CATEGORY_EMOJI: Record<Category, string> = {
+  vegetables: '🥬', fruits: '🍎', dairy: '🧀', eggs: '🥚', meat_seafood: '🍗', grains: '🌾',
+  pulses: '🫘', spices: '🌶️', sauces: '🥫', frozen: '🧊', other: '🍽️',
+}
+export const categoryEmoji = (c: string) => CATEGORY_EMOJI[c as Category] ?? '🍽️'
+
+/** Short expiry label: "Expires today", "Expires in 2 days", "Past expiry date", or null when there's no date. */
+export function expiryLabel(expiry: string | null): string | null {
+  const d = daysUntil(expiry)
+  if (d === null) return null
+  return d < 0 ? 'Past expiry date' : d === 0 ? 'Expires today' : d === 1 ? 'Expires tomorrow' : `Expires in ${d} days`
+}
+
 export const DIETS: { value: Diet; label: string; hint: string }[] = [
   { value: 'none', label: 'No preference', hint: 'Anything goes' },
   { value: 'vegetarian', label: 'Vegetarian', hint: 'No meat, fish or eggs' },

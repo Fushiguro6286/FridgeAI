@@ -10,7 +10,7 @@ describe('RecipeCard', () => {
     expect(within(screen.getByRole('list', { name: 'You have' })).getAllByRole('listitem')).toHaveLength(3)
     expect(within(screen.getByRole('list', { name: 'Missing' })).getByText('green chilli')).toBeInTheDocument()
     expect(within(screen.getByRole('list', { name: 'Optional & pantry staples' })).getByText('salt')).toBeInTheDocument()
-    expect(screen.getByText('75% in your kitchen')).toBeInTheDocument() // 3 of 4 required
+    expect(screen.getByText('Match: 75%')).toBeInTheDocument() // 3 of 4 required
     expect(screen.getByRole('button', { name: 'Save Paneer Bhurji' })).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByRole('button', { name: 'Add Paneer Bhurji to meal plan' })).toBeInTheDocument()
   })
