@@ -1,173 +1,111 @@
-# FridgeAI — Smart AI Meal Planner
+# FridgeAI
 
-> Your fridge. Your ingredients. Smarter meals.
+**Cook from what's already in your fridge.** Snap a photo of your fridge, let AI find the ingredients, get recipes you can cook right now, plan your week's meals, and order only what's missing from Blinkit, Zepto, Swiggy Instamart, BigBasket or JioMart.
 
-Upload a fridge photo → an AI vision model (via OpenRouter) suggests the visible ingredients → you review and confirm them → get ranked recipes → generate a daily or weekly meal plan → get a shopping list for only what's missing.
+![FridgeAI landing page](docs/screenshots/landing.webp)
 
-- **Frontend:** React 19, Vite, TypeScript, Tailwind CSS 4, shadcn/ui (Radix), TanStack Query, React Router, React Hook Form + Zod, Lucide icons
-- **Backend:** FastAPI, Pydantic, SQLAlchemy 2, Alembic, PostgreSQL, official OpenAI Python SDK pointed at OpenRouter (Chat Completions + structured outputs), Argon2 password hashing, JWT
-- **Tests:** Pytest (50 tests) and Vitest + React Testing Library (18 tests). Every AI call is mocked.
+## Features
 
----
-
-## Quick start
-
-Prerequisites: Python 3.12+, Node 20+, Docker (for PostgreSQL).
-
-### 1. Database
-
-```bash
-docker compose up -d          # PostgreSQL 17 on localhost:5432
-```
-
-No Docker? For local development you can use SQLite instead: set `DATABASE_URL=sqlite:///./fridgeai.db` in `backend/.env`.
-
-### 2. Backend
-
-```bash
-cd backend
-python -m venv .venv
-# Windows: .venv\Scripts\activate     macOS/Linux: source .venv/bin/activate
-pip install -r requirements-dev.txt
-cp .env.example .env           # then edit .env (see below)
-alembic upgrade head
-uvicorn app.main:app --reload --port 8000
-```
-
-In `backend/.env` set at least:
-
-| Variable | Notes |
+| | |
 |---|---|
-| `SECRET_KEY` | Long random string: `python -c "import secrets; print(secrets.token_urlsafe(48))"`. Required in production. |
-| `AI_API_KEY` | Your OpenRouter API key (from openrouter.ai). Stays on the server and is never sent to the browser. |
-| `AI_MODEL` | Default `nvidia/nemotron-3.5-super-vl:free`, the fastest good free model we tested (50 requests/day on the free tier). Paid option: `anthropic/claude-haiku-5.5`. The model must support image input and structured outputs. |
-| `AI_DISABLE_REASONING` | Default `true`. Turns off the model's hidden "thinking", which makes scans about 3x faster (≈7 s instead of ≈23 s) with the same results. Set `false` if a model rejects the setting. |
-| `AI_BASE_URL` | Default `https://openrouter.ai/api/v1`. Any OpenAI-compatible server works. |
+| **AI fridge scan** | Upload a photo. A vision AI lists the ingredients it sees, with a confidence level. You review and edit everything; nothing is saved until you confirm. |
+| **My Ingredients** | Your pantry: quantities, expiry dates, "use soon" items, search and category filters. |
+| **Recipes you can cook now** | AI suggests recipes from your pantry. Each one shows a match %, what you have, and what's missing. Your diet, allergies and cooking time are respected. |
+| **Meal planner** | An AI-built plan for breakfast, lunch and dinner over 1–7 days. Swap any single meal without touching the rest. |
+| **Smart shopping list** | Built from your plan. Only buys what's missing, merges amounts across meals, and never mixes kg with pieces. |
+| **Order online** | Opens each missing item in your chosen delivery app, or sends the list to your local kirana on WhatsApp. |
+| **Order notepad** | A small pop-up checklist that stays open while you shop in Blinkit or another app, even after you close FridgeAI. |
+| **Dashboard** | Pantry stats, items to cook first, today's meals, shopping list and a daily kitchen tip. |
+| **Light and dark mode, mobile friendly** | Sidebar on desktop, bottom tabs on phones. |
 
-API docs: http://localhost:8000/docs
+## Screenshots
 
-### 3. Frontend
+| Dashboard | AI scan review |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.webp) | ![Scan review](docs/screenshots/scan.webp) |
+| **Recipes** | **Recipe detail** |
+| ![Recipes](docs/screenshots/recipes.webp) | ![Recipe detail](docs/screenshots/recipe-detail.webp) |
+| **Meal planner** | **My Ingredients** |
+| ![Meal planner](docs/screenshots/planner.webp) | ![My Ingredients](docs/screenshots/ingredients.webp) |
+| **Order missing items** | **Order notepad and phone view** |
+| ![Order dialog](docs/screenshots/order.webp) | <img src="docs/screenshots/notepad.webp" alt="Order notepad" width="49%"> <img src="docs/screenshots/mobile.webp" alt="Phone view" width="49%"> |
 
-```bash
-cd frontend
-npm install
-cp .env.example .env           # VITE_API_URL=http://localhost:8000
-npm run dev                    # http://localhost:5173
-```
+## Tech stack
 
-Create an account, then go to **Scan Fridge**.
-
-### Trying it without an API key (mock mode)
-
-Set `AI_MOCK_MODE=true` in `backend/.env`. Scans and recipes then return **clearly labelled sample data** (a yellow banner appears on every page, and recipes are tagged "Sample"). Mock mode is refused at startup when `ENVIRONMENT=production`. With mock mode off and no key, AI features return a clear "AI isn't configured" error and manual ingredient entry still works. Fake results are never substituted silently.
-
----
-
-## Running tests
-
-```bash
-cd backend  && python -m pytest        # 50 tests, SQLite in memory, AI mocked
-cd frontend && npm test                # 17 tests
-cd frontend && npm run build           # type-check + production build
-```
-
-Backend tests cover ingredient matching, unit conversion, diet and allergy filtering, the ranking function, the planner, shopping aggregation, image validation (real bytes, not MIME type), mapping of AI API errors (including out-of-credit) and refusals, rate limits, keeping each user's data private, and the whole scan → recipes → plan → shopping journey.
-
----
+- **Frontend:** React 19, Vite, TypeScript, Tailwind CSS 4, shadcn/ui (Radix), TanStack Query, React Router, React Hook Form + Zod
+- **Backend:** FastAPI, SQLAlchemy 2, Alembic, PostgreSQL, Pydantic, Argon2 passwords, JWT login
+- **AI:** any OpenAI-compatible API. The default is OpenRouter with the free `nvidia/nemotron-3.5-super-vl:free` vision model.
+- **Tests:** Pytest (53 tests) and Vitest + React Testing Library (29 tests)
 
 ## How it works
 
-**The AI suggests; normal code decides.**
+**The AI suggests; normal code decides.** The AI only lists ingredients and writes recipe ideas. Everything that must be correct is plain, tested code:
+- checking diet and allergy rules
+- working out what you have and what's missing (from your pantry, never from the AI's claims)
+- ranking recipes
+- assigning meals to the plan
+- unit-safe shopping maths
 
-| Step | AI does | Deterministic code does |
-|---|---|---|
-| Scan | Lists visible food with a confidence level (structured output, Pydantic-validated) | Validates and re-encodes the image, strips EXIF/GPS, de-duplicates results, drops nonsense quantities. **Nothing is saved until you confirm.** |
-| Recipes | Proposes recipes from your confirmed inventory | Validates the output. Rejects recipes that break your diet, allergies or exclusions (and tells you which and why). **Works out available, missing and optional itself, from your current inventory, never from the AI's claims.** Ranks the recipes. |
-| Meal plan | Fills gaps with new recipe ideas only when your saved recipes aren't enough | Assigns meals to slots, avoids same-day repeats, rotates dishes, prefers recipes that use your stock and "use soon" items, and tracks estimated stock use. Unknown quantities are flagged, never treated as unlimited. |
-| Shopping | Nothing | Merges needs across meals, converts compatible units (g↔kg, ml↔l↔tsp), **never mixes kg with pieces**, subtracts stock, and puts items with unknown stock under "Check your stock". Your custom items, ticks and prices survive recalculation. |
+## Run it locally
 
-Ranking (`backend/app/services/ranking.py`) scores out of 100: share of required ingredients you have (40), few missing items (20), fits your time limit (15), matches your cuisines (10), uses priority ingredients (15), and a missing-cost penalty (−10), which only applies when real price data exists. Recipes that break your diet score 0.
+You need Python 3.12+, Node 20+ and Docker (for PostgreSQL).
 
----
+```bash
+# 1. Database
+docker compose up -d
 
-## Project layout
+# 2. Backend  (http://localhost:8000, API docs at /docs)
+cd backend
+python -m venv .venv
+.venv\Scripts\activate            # macOS/Linux: source .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env              # then fill in SECRET_KEY and AI_API_KEY
+alembic upgrade head
+uvicorn app.main:app --reload --port 8000
 
-```
-backend/
-  app/
-    main.py            app, CORS, size limit, error envelope
-    config.py          env-based settings with production safety checks
-    auth.py            Argon2 hashing, JWT, current-user dependency
-    models.py          SQLAlchemy models (users, preferences, inventory, recipes, plans, shopping)
-    schemas.py         Pydantic request/response + LLM output schemas
-    routers/           auth, detect, inventory, recipes, meal_plans, shopping, preferences
-    services/
-      llm.py           OpenRouter / OpenAI-compatible wrapper (timeouts, errors, refusals, structured output)
-      vision.py        fridge-photo detection
-      images.py        byte-level image validation + metadata stripping
-      recipes.py       recipe generation, validation, filtering, availability
-      ranking.py       deterministic ranking
-      planner.py       deterministic meal planner
-      shopping.py      unit-safe aggregation
-      ingredients.py   name matching, units, diet/allergen rules
-      meal_plans.py    plan + shopping-list orchestration
-  alembic/             migrations
-  tests/
-frontend/
-  src/
-    pages/             Landing, Auth, Dashboard, Scan, Ingredients, Recipes, RecipeDetail, Planner, Shopping, Settings
-    components/        RecipeCard, IngredientReview, dialogs, shared states; ui/ = shadcn
-    layouts/           AppLayout (sidebar on desktop, bottom tabs on mobile)
-    hooks/             TanStack Query hooks per feature
-    lib/               api client, auth, theme, formatting
-    schemas/           Zod form schemas
-    types/             API types
-docker-compose.yml     local PostgreSQL
+# 3. Frontend  (http://localhost:5173)
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
 ```
 
-## API summary
+Main settings in `backend/.env`:
 
-All routes are under `/api`, return JSON, and report errors as `{"error": {"code", "message", "details?"}}`. Every route except health and auth requires `Authorization: Bearer <token>`, and every resource is scoped to its owner (another user's IDs return 404).
-
-| Area | Endpoints |
+| Variable | What it is |
 |---|---|
-| Health | `GET /health` |
-| Auth | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` |
-| Detection | `POST /ingredients/detect` (multipart `image`) |
-| Inventory | `GET /inventory` (search, category, status, sort, pagination), `POST /inventory`, `POST /inventory/bulk`, `PATCH /inventory/{id}`, `DELETE /inventory/{id}` |
-| Recipes | `POST /recipes/generate`, `GET /recipes` (`saved`, `sort=best_match`), `GET /recipes/{id}`, `POST /recipes/{id}/save`, `DELETE /recipes/{id}/save` |
-| Meal plans | `POST /meal-plans/generate`, `GET /meal-plans`, `GET /meal-plans/{id}`, `PATCH /meal-plans/{id}`, `DELETE /meal-plans/{id}`, `POST /meal-plans/{id}/entries`, `PATCH/DELETE /meal-plans/{id}/entries/{entry_id}`, `POST /meal-plans/{id}/entries/{entry_id}/regenerate` |
-| Shopping | `GET /shopping-list`, `POST /shopping-list/generate`, `POST /shopping-list/items`, `PATCH/DELETE /shopping-list/items/{id}` |
-| Preferences | `GET /preferences`, `PATCH /preferences` |
+| `SECRET_KEY` | Long random string. Make one with `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
+| `AI_API_KEY` | Your OpenRouter key (openrouter.ai). It stays on the server. |
+| `AI_MODEL` | Default `nvidia/nemotron-3.5-super-vl:free`. It must support images and structured output. |
+| `AI_MOCK_MODE` | `true` to try the app without a key. It returns clearly labelled sample data. |
+| `CORS_ORIGINS` | Frontend address(es) allowed to call the API |
 
----
+No Docker? Set `DATABASE_URL=sqlite:///./fridgeai.db` for local development.
+
+## Tests
+
+```bash
+cd backend  && python -m pytest     # 53 tests, AI calls mocked
+cd frontend && npm test             # 29 tests
+cd frontend && npm run build        # type-check + production build
+```
+
+## Deploy
+
+- **Frontend:** Vercel or Netlify. Set the root to `frontend` and `VITE_API_URL=https://your-api`. Route all paths to `index.html`.
+- **Backend:** Render or Koyeb. Set the root to `backend` and the start command to `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Set `ENVIRONMENT=production`, `SECRET_KEY`, `DATABASE_URL`, the `AI_*` variables and `CORS_ORIGINS`.
+- **Database:** Neon (free PostgreSQL). Use a `postgresql+psycopg://…` URL.
 
 ## Security and privacy
 
-- Secrets come only from environment variables. `.env` is git-ignored, and `.env.example` holds placeholders only.
-- The AI API key never leaves the backend.
-- Images are validated by their actual bytes with Pillow (JPEG/PNG/WEBP only, decompression-bomb guard, 8 MB limit by default), then re-encoded so EXIF and GPS data is stripped before anything is sent to the AI provider. **Images are never written to disk or the database.**
-- Prompts tell the model that text in images and user data is information only, never instructions.
-- Passwords are hashed with Argon2id, login timing is equalised for unknown emails, and JWTs carry an expiry.
-- Rate limits apply to AI endpoints (per user) and auth endpoints (per IP). Request bodies have a size cap.
-- CORS uses an explicit origin list, and `*` is refused in production. API docs are disabled in production.
-- Error messages are safe to show. Raw images, passwords and keys are never logged.
-
-## Deploying
-
-The frontend and backend deploy separately.
-
-- **Backend:** set `ENVIRONMENT=production`, a strong `SECRET_KEY`, `DATABASE_URL` (PostgreSQL), `AI_API_KEY`, and `CORS_ORIGINS=https://your-frontend`. Run `alembic upgrade head`, then `uvicorn app.main:app --host 0.0.0.0 --port 8000` behind HTTPS.
-- **Frontend:** `VITE_API_URL=https://your-api npm run build`, then serve `dist/` as a single-page app (route all paths to `index.html`).
+- Keys and secrets come only from environment variables. `.env` is git-ignored.
+- Photos are checked by their real bytes and re-encoded to strip GPS/EXIF data. They are **never stored**.
+- Every user sees only their own data. Rate limits apply to the AI and login routes.
 
 ## Known limitations
 
-- **Not tested against a running PostgreSQL yet.** Docker wasn't running on the build machine, so the tests and migration checks ran on SQLite. The models and migration avoid SQLite-only features, but run `docker compose up -d && alembic upgrade head` once before relying on PostgreSQL.
-- **Free models are slower and less accurate.** Photo scans on the free model may miss items; users review every result before it is saved.
-- Rate limiting is in-process memory: limits apply per server process. Use Redis if you run several workers.
-- The session token is stored in `localStorage` (readable by any XSS). If the frontend and API share a site, an httpOnly cookie is safer.
+- Free AI models are slower and can miss items, which is why every scan is reviewed before saving.
+- Recipes are filtered against your allergies but are **not guaranteed allergen-free**. Always check labels.
+- Grocery apps don't let other sites fill your cart. FridgeAI opens each item in the app's search for you to add.
 - No password reset or email verification yet.
-- Ingredient matching is rule-based (plurals, common Indian/English aliases, "red onion" satisfies "onion"). Unusual names may not match. Users can rename items.
-- Prices exist only when users enter them, so FridgeAI never invents a cost estimate.
-- Nutrition notes are rough and AI-written, and are labelled that way. Recipes are filtered against your allergies but **not guaranteed allergen-free**.
-- Recipe images are generated artwork, not photos. Drop real photos into `frontend/public/` if you have licensed ones.
+- Dish photos appear only for common dishes (e.g. palak paneer, biryani, poha). Other recipes show an illustration.

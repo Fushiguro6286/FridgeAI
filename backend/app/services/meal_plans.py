@@ -217,8 +217,9 @@ def recalc(db: Session, user: User, sl: ShoppingList) -> None:
     db.expire_all()
     plan = db.get(MealPlan, sl.meal_plan_id) if sl.meal_plan_id else None
     rows = compute_shopping(needs_for_plan(plan), rs.load_stock(db, user)) if plan else []
-    old = {(i.normalized_name, i.unit or ""): i for i in sl.items if not i.is_custom}
-    for item in old.values():
+    generated = [i for i in sl.items if not i.is_custom]
+    old = {(i.normalized_name, i.unit or ""): i for i in generated}
+    for item in generated:  # all of them: the dict above drops rows that share a key
         sl.items.remove(item)
     db.flush()
     for row in rows:

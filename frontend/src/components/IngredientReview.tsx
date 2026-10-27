@@ -71,14 +71,14 @@ export function IngredientReview({
     ),
   )
 
-  const cols = 'md:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)_minmax(0,1.7fr)_10rem_2.5rem]'
+  const cols = '@3xl:grid-cols-[minmax(0,2fr)_minmax(9.5rem,1.3fr)_12.5rem_8.5rem_2.5rem]'
   const bump = (index: number, dir: 1 | -1) =>
     form.setValue(`items.${index}.quantity`, stepQty(form.getValues(`items.${index}.quantity`) ?? '', dir), { shouldValidate: true })
 
   return (
     <form onSubmit={submit} noValidate className="space-y-6">
-      <div className="overflow-hidden rounded-3xl border bg-card shadow-(--shadow-card)">
-        <div className={cn('hidden gap-4 border-b bg-muted/40 px-8 py-4 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground md:grid', cols)} aria-hidden>
+      <div className="@container overflow-hidden rounded-3xl border bg-card shadow-(--shadow-card)">
+        <div className={cn('hidden gap-3 border-b bg-muted/40 px-6 py-4 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground @3xl:grid', cols)} aria-hidden>
           <span>Ingredient</span>
           <span>Category</span>
           <span>Quantity</span>
@@ -92,9 +92,9 @@ export function IngredientReview({
             const id = `rev-${field.id}`
             const note = form.watch(`items.${index}.notes`)
             return (
-              <li key={field.id} className={cn('grid items-center gap-3 px-5 py-5 md:gap-4 md:px-8', cols)}>
+              <li key={field.id} className={cn('grid items-center gap-3 px-5 py-5 @3xl:gap-3 @3xl:px-6', cols)}>
                 <div className="grid gap-1.5">
-                  <Label htmlFor={`${id}-name`} className="md:sr-only">
+                  <Label htmlFor={`${id}-name`} className="@3xl:sr-only">
                     Name
                   </Label>
                   <div className="flex items-center gap-3">
@@ -107,7 +107,7 @@ export function IngredientReview({
                   {note && <p className="text-xs text-muted-foreground">Note: {note}</p>}
                 </div>
                 <div className="grid gap-1.5">
-                  <Label htmlFor={`${id}-cat`} className="md:sr-only">
+                  <Label htmlFor={`${id}-cat`} className="@3xl:sr-only">
                     Category
                   </Label>
                   <Controller
@@ -130,7 +130,7 @@ export function IngredientReview({
                   />
                 </div>
                 <div className="grid gap-1.5">
-                  <div className="flex gap-2 md:sr-only">
+                  <div className="flex gap-2 @3xl:sr-only">
                     <Label htmlFor={`${id}-qty`} className="flex-1">
                       Quantity
                     </Label>
@@ -142,11 +142,11 @@ export function IngredientReview({
                     <Button type="button" variant="secondary" size="icon-sm" onClick={() => bump(index, -1)} aria-label="Decrease quantity">
                       <Minus />
                     </Button>
-                    <Input id={`${id}-qty`} inputMode="decimal" placeholder="?" className="w-16 text-center font-semibold" {...form.register(`items.${index}.quantity`)} aria-invalid={!!err?.quantity} />
+                    <Input id={`${id}-qty`} inputMode="decimal" placeholder="?" className="w-12 text-center font-semibold" {...form.register(`items.${index}.quantity`)} aria-invalid={!!err?.quantity} />
                     <Button type="button" variant="secondary" size="icon-sm" onClick={() => bump(index, 1)} aria-label="Increase quantity">
                       <Plus />
                     </Button>
-                    <Input id={`${id}-unit`} placeholder="pcs, g…" className="w-20" {...form.register(`items.${index}.unit`)} />
+                    <Input id={`${id}-unit`} placeholder="pcs, g…" className="w-16 min-w-0" {...form.register(`items.${index}.unit`)} />
                   </div>
                   {err?.quantity && <p className="text-xs text-destructive">{err.quantity.message}</p>}
                 </div>

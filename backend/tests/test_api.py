@@ -366,3 +366,19 @@ def test_repeated_generation_does_not_duplicate_dishes(client, auth, mock_ai):
     for e in plan["entries"]:
         per_day.setdefault(e["day_date"], []).append(e["recipe"]["title"])
     assert all(len(v) == len(set(v)) for v in per_day.values()), per_day
+
+
+def test_rebuild_removes_every_stale_generated_row(client):
+    from app.models import ShoppingListItem, User
+    from app.services.meal_plans import get_shopping_list, recalc
+    from tests.conftest import TestSession
+
+    make_user(client)
+    with TestSession() as db:
+        user = db.query(User).one()
+        sl = get_shopping_list(db, user)
+        for custom in (False, False, True):  # two generated rows with the same key, plus one of the user's own
+            sl.items.append(ShoppingListItem(name="tomato", normalized_name="tomato", status="check", is_custom=custom))
+        db.commit()
+        recalc(db, user, sl)
+        assert [(i.name, i.is_custom) for i in get_shopping_list(db, user).items] == [("tomato", True)]
